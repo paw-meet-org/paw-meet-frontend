@@ -1,0 +1,2449 @@
+openapi: 3.1.0
+info:
+  title: Paw-Meet API
+  description: API para la red social Paw-Meet. Protegida mediante JWT Bearer.
+  version: 1.0.0
+  contact:
+    email: amendoma@alumnos.unex.es
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+
+servers:
+  - url: http://localhost:8000
+  - url: http://localhost:3000
+
+tags:
+  - name: Usuario
+  - name: Social
+  - name: Encuentros
+  - name: Administrador
+
+security:
+  - BearerAuth: []
+
+paths:
+
+  /api/registro:
+    post:
+      tags:
+        - Usuario
+      summary: Registro de usuario
+      description: Registra un usuario en el sistema.
+      security: []
+      operationId: registro
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Registro'
+      responses:
+        '201':
+          description: Usuario registrado correctamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: true
+                status: 201
+                message: "Registro realizado correctamente"
+        '400':
+          description: Problemas con el cuerpo de la petición
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 400
+                message: "Existen errores en el cuerpo de la petición"
+                error: "Bad Request"
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 500
+                message: "Error interno del servidor"
+                error: "Internal Server Error"
+
+  /api/login:
+    post:
+      tags:
+        - Usuario
+      summary: Login de usuario
+      description: Devuelve un token JWT para autenticación.
+      security: []
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Login'
+      responses:
+        '200':
+          description: Login correcto
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          description: Credenciales incorrectas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 401
+                message: "Las credenciales indicadas en el cuerpo de la peticion son incorrectas"
+                error: "Invalid Credentials"
+        '404':
+          description: Usuario no registrado en el sistema
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 404
+                message: "Las credenciales del usuario indicado no se encuetran registradas en el sistema. Regístrate"
+                error: "Data Not Found"
+        '500':
+          description: Error internos del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 500
+                message: "Error interno del servidor"
+                error: "Internal Server Error"
+
+  /api/user:
+    patch:
+      tags:
+        - Usuario
+      summary: Actualizar perfil de usuario
+      description: Permite modificar datos del usuario autenticado.
+      operationId: updateUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUser'
+      responses:
+        '200':
+          description: Perfil actualizado correctamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: true
+                status: 200
+                message: "Información sobre usuario actualizada correctamente"
+        '400':
+          description: Campos incorrectos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 400
+                message: "Los campos definidos en el cuerpo de la peticion son incorrectos"
+                error: "Bad Request"
+        '401':
+          description: Autentificación fallida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 401
+                message: "No estás autentifcado en el sistema. El token puede estar caducado"
+                error: "Invalid Token"
+        '404':
+          description: Usuario no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 404
+                message: "No se ha encontrado el usuario para actualizar sus campos"
+                error: "Data Not Found"
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 500
+                message: "Error interno del servidor"
+                error: "Internal Server Error"
+
+
+  /api/user/mascota:
+    post:
+      tags:
+        - Usuario
+      summary: Registrar mascota
+      description: Registra una mascota asociada al usuario autenticado.
+      operationId: registrarMascotas
+      requestBody:
+        $ref: '#/components/requestBodies/MascotaCreateBody'
+      responses:
+        '201':
+          description: Mascota registrada correctamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: true
+                status: 201
+                message: "Mascota registrada correctamente en el sistema"
+        '400':
+          description: Campos incorrectos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 400
+                message: "Los campos indicados en el cuerpo de la petición no son los correctos"
+                error: "Bad Request"
+        '401':
+          description: Autentificación fallida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 401
+                message: "No estás autentifcado en el sistema. El token puede estar caducado"
+                error: "Invalid Token"
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 500
+                message: "Error interno del servidor"
+                error: "Internal Server Error"
+
+    get:
+      tags:
+        - Usuario
+      summary: Obtener mascotas del usuario
+      description: Devuelve las mascotas del usuario autenticado.
+      operationId: getMascotas
+      responses:
+        '200':
+          description: Lista de mascotas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Mascota'
+        '401':
+          description: Autentificación fallida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 401
+                message: "No estás autentificado en el sistema. El token puede estar caducado"
+                error: "Invalid Token"
+        '404':
+          description: Usuario sin mascotas registradas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 404
+                message: "El usuario no tiene mascotas registradas"
+                error: "Data Noy Found"
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 500
+                message: "Error interno del servidor"
+                error: "Internal Server Error"
+
+  /api/admin/users:
+    post:
+      tags:
+        - Administrador
+      summary: Registra un nuevo usuario en el sistema
+      description: Registra un nuevo usuario en el sistema dado los datos procedentes del cuerpo de la petición
+      operationId: registrarUsuario
+      requestBody:
+        $ref: '#/components/requestBodies/UsuarioCreateBody'
+      responses:
+        '201':
+          description: Usuario insertado correctamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: true
+                status: 201
+                message: "Usuario registrado en el sistema"
+        '400':
+          description: Campos no validos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 400
+                message: "Los campos indicados en el cuerpo de la peticion no son correctos"
+                error: "Bad Request"
+        '401':
+          description: Autentificación fallida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 401
+                message: "No estás autentificado. El token puede haber expirado"
+                error: "Invalid Token"
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 500
+                message: "Error interno del servidor"
+                error: "Internal Server Error"
+    get:
+      tags:
+        - Administrador
+      summary: Obtiene todos los usuarios
+      description: Obtiene todos los usuarios registrados en el sistema
+      operationId: obtenerUsuarios
+      responses:
+        '200':
+          description: Datos recuperados de forma exitosa
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Usuario'
+        '401':
+          description: Autentificación fallida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 401
+                message: "No estás autentificado. El token puede haber expirado"
+                error: "Invalid Token"
+        '404':
+          description: No se han encontrado usuarios registrados
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 404
+                message: "No se han encontrado usuarios registrados en el sistema"
+                error: "Data Noy Found"
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 500
+                message: "Error interno del servidor"
+                error: "Internal Server Error"
+
+  /api/admin/users/{id}:
+    get:
+      tags:
+        - Administrador
+      summary: Obtiene el usuario seleccionado
+      description: Obtiene el usuario cuyo identificador coincide con el pasado por parámetros en la petición.
+      operationId: obtenerUsuarioPoIdentificador
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          description: Usuario obtenido correctamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Usuario'
+        '400':
+          description: Parametro invalido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 400
+                message: "El tipo del parámetro indicado en la petición no coincide con el tipo esperado"
+                error: "Invalid Param"
+        '401':
+          description: Autentificación fallida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 401
+                message: "No estás autentificado. El token puede haber expirado"
+                error: "Invalid Token"
+        '404':
+          description: Error al recuperar el usuario indicado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 404
+                message: "No se han encotrado usuarios cuyo identificador coincida con el esperado"
+                error: "Data Not Found"
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 401
+                message: "Error interno del servidor"
+                error: "Internal Server Error"
+
+    patch:
+      tags:
+        - Administrador
+      summary: Actualiza informacion del usuario seleccionado
+      description: Actualiza información sobre el usario indicado por parámetros
+      operationId: actualizarUsuario
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      requestBody:
+        $ref: '#/components/requestBodies/UsuarioUpdate'
+      responses:
+        '200':
+          description: Informacion de usuario actualizada correctamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: true
+                status: 200
+                message: Actualización sobre la información del usuario seleccionado exitosa
+        '400':
+          description: Cuerpo de la petición invalido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 400
+                message: "El cuerpo de la petición indicado contiene errores"
+                error: "Bad Request"
+        '401':
+          description: Autentificación fallida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 401
+                message: "No estás autentificado. El token puede haber expirado"
+                error: "Invalid Token"
+        '404':
+          description: Error al actualizar un usuario
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 404
+                message: "No se han encotrado usuarios cuyo identificador coincida con el esperado"
+                error: "Data Not Found"
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 401
+                message: "Error interno del servidor"
+                error: "Internal Server Error"
+
+    delete:
+      tags:
+        - Administrador
+      summary: Elimina información del usuario seleccionado
+      description: Elimina un usuario seleccionado del sistema
+      operationId: deleteUsuario
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '204':
+          description: Eliminacion de usuario realizado de forma exitosa
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: true
+                status: 204
+                message: Eliminación de usuario satisfactoria
+        '400':
+          description: Parámetros de la petición invalido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 400
+                message: "Los parámetros indicados en la petición no son correctos"
+                error: "Invalid Parameters"
+        '401':
+          description: Autentificación fallida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 401
+                message: "No estás autentificado. El token puede haber expirado"
+                error: "Invalid Token"
+        '404':
+          description: Error al eliminar un usuario
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 404
+                message: "No se han encotrado usuarios cuyo identificador coincida con el esperado"
+                error: "Data Not Found"
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 401
+                message: "Error interno del servidor"
+                error: "Internal Server Error"
+
+  /api/admin/sponsors:
+    post:
+      tags:
+        - Administrador
+      summary: Registra un nuevo sponsor en el sistema
+      description: Registra un nuevo sponsor en el sistema dado los datos procedentes del cuerpo de la petición
+      operationId: registrarSponsor
+      requestBody:
+        $ref: '#/components/requestBodies/SponsorCreateBody'
+      responses:
+        '201':
+          description: Sponsor insertado correctamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: true
+                status: 201
+                message: "Sponsor registrado en el sistema"
+        '400':
+          description: Campos no validos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 400
+                message: "Los campos indicados en el cuerpo de la peticion no son correctos"
+                error: "Bad Request"
+        '401':
+          description: Autentificación fallida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 401
+                message: "No estás autentificado. El token puede haber expirado"
+                error: "Invalid Token"
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 500
+                message: "Error interno del servidor"
+                error: "Internal Server Error"
+    get:
+      tags:
+        - Administrador
+      summary: Obtiene todos los sponsors
+      description: Obtiene todos los sponsors registrados en el sistema
+      operationId: obtenerSponsors
+      responses:
+        '200':
+          description: Datos recuperados de forma exitosa
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SponsorBase'
+        '401':
+          description: Autentificación fallida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 401
+                message: "No estás autentificado. El token puede haber expirado"
+                error: "Invalid Token"
+        '404':
+          description: No se han encontrado sponsors registrados
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 404
+                message: "No se han encontrado sponsors registrados en el sistema"
+                error: "Data Noy Found"
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 500
+                message: "Error interno del servidor"
+                error: "Internal Server Error"
+
+  /api/admin/sponsors/{id}:
+    get:
+      tags:
+        - Administrador
+      summary: Obtiene el sponsor seleccionado
+      description: Obtiene el sponsor cuyo identificador coincide con el pasado por parámetros en la petición.
+      operationId: obtenerSponsorPoIdentificador
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          description: Sponsor obtenido correctamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SponsorBase'
+        '400':
+          description: Parametro invalido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 400
+                message: "El tipo del parámetro indicado en la petición no coincide con el tipo esperado"
+                error: "Invalid Param"
+        '401':
+          description: Autentificación fallida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 401
+                message: "No estás autentificado. El token puede haber expirado"
+                error: "Invalid Token"
+        '404':
+          description: Error al recuperar el sponsor indicado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 404
+                message: "No se han encotrado sponsors cuyo identificador coincida con el esperado"
+                error: "Data Not Found"
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 401
+                message: "Error interno del servidor"
+                error: "Internal Server Error"
+
+    patch:
+      tags:
+        - Administrador
+      summary: Actualiza informacion del sponsor seleccionado
+      description: Actualiza información sobre el sponsor indicado por parámetros
+      operationId: actualizarSponsor
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      requestBody:
+        $ref: '#/components/requestBodies/SponsorUpdate'
+      responses:
+        '200':
+          description: Informacion de sponsor actualizado correctamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: true
+                status: 200
+                message: Actualización sobre la información del sponsor seleccionado exitosa
+        '400':
+          description: Cuerpo de la petición invalido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 400
+                message: "El cuerpo de la petición indicado contiene errores"
+                error: "Bad Request"
+        '401':
+          description: Autentificación fallida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 401
+                message: "No estás autentificado. El token puede haber expirado"
+                error: "Invalid Token"
+        '404':
+          description: Error al actualizar un sponsor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 404
+                message: "No se han encotrado sponsors cuyo identificador coincida con el esperado"
+                error: "Data Not Found"
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 401
+                message: "Error interno del servidor"
+                error: "Internal Server Error"
+
+    delete:
+      tags:
+        - Administrador
+      summary: Elimina información del sponsor seleccionado
+      description: Elimina un sponsor seleccionado del sistema
+      operationId: deleteSponsor
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '204':
+          description: Informacion de sponsor elimianada correctamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: true
+                status: 204
+                message: Eliminación de sponsor satisfactoria
+        '400':
+          description: Parámetros de la petición invalido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 400
+                message: "Los parámetros indicados en la petición no son correctos"
+                error: "Invalid Parameters"
+        '401':
+          description: Autentificación fallida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 401
+                message: "No estás autentificado. El token puede haber expirado"
+                error: "Invalid Token"
+        '404':
+          description: Error al eliminar un usuario
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 404
+                message: "No se han encotrado sponsor cuyo identificador coincida con el esperado"
+                error: "Data Not Found"
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 401
+                message: "Error interno del servidor"
+                error: "Internal Server Error"
+
+  /api/admin/ciudad:
+    get:
+      tags:
+        - Administrador
+      summary: Obtiene todas las ciudades del sistema
+      description: Obtiene todas las ciudades registradas en el sistema
+      operationId: obtenerCiudades
+      responses:
+        '200':
+          description: Ciudades recuperadas exitosamente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CiudadBase'
+        '401':
+          description: Autentificación fallida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 401
+                message: "No estás autentificado. El token puede haber expirado"
+                error: "Invalid Token"
+        '404':
+          description: Error al obtener datos de ciudades
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 404
+                message: "No se han encotrado ciudades registradas en el sistema"
+                error: "Data Not Found"
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 401
+                message: "Error interno del servidor"
+                error: "Internal Server Error"
+    post:
+      tags:
+        - Administrador
+      summary: Registra una nueva ciudad en el sistema
+      description: Dado los datos pasados en el cuerpo de la peticion, registra una nueva ciudad
+      operationId: registrarCiudad
+      requestBody:
+        $ref: '#/components/requestBodies/CiudadCreateBody'
+      responses:
+        '201':
+          description: Registrado una nueva ciudad en el sistema
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: true
+                status: 201
+                message: "Se ha registrado una nueva ciudad en el sistema de forma exitosa"
+        '400':
+          description: Cuerpo de la peticion incorrecto
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 400
+                message: "El cuerpo de la petición es incorrecto"
+                error: "Bad Request"
+        '401':
+          description: Autentificación fallida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 401
+                message: "No estás autentificado. El token puede haber expirado"
+                error: "Invalid Token"
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 401
+                message: "Error interno del servidor"
+                error: "Internal Server Error"
+
+  /api/admin/razas:
+    get:
+      tags:
+        - Administrador
+      summary: Obtiene todos los tipos de mascota registrados en el sistema
+      description: Obtiene todos los tipos de mascota registrados en el sistema
+      operationId: obtenerTipoMascota
+      responses:
+        '200':
+          description: Tipos de mascota recuperados exitosamente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TipoMascotaBase'
+        '401':
+          description: Autentificación fallida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 401
+                message: "No estás autentificado. El token puede haber expirado"
+                error: "Invalid Token"
+        '404':
+          description: Error al obtener datos de tipos de mascota
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 404
+                message: "No se han encotrado tipos de mascota registrados en el sistema"
+                error: "Data Not Found"
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 401
+                message: "Error interno del servidor"
+                error: "Internal Server Error"
+    post:
+      tags:
+        - Administrador
+      summary: Registra un nuevo tipo de mascota en el sistema
+      description: Dado los datos pasados en el cuerpo de la peticion, registra un nuevo tipo de mascota
+      operationId: registrarTipoMascota
+      requestBody:
+        $ref: '#/components/requestBodies/TipoMascotaCreateBody'
+      responses:
+        '201':
+          description: Registrado un nuevo tipo de mascota en el sistema
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: true
+                status: 201
+                message: "Se ha registrado un nuevo tipo de mascotas en el sistema de forma exitosa"
+        '400':
+          description: Cuerpo de la peticion incorrecto
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 400
+                message: "El cuerpo de la petición es incorrecto"
+                error: "Bad Request"
+        '401':
+          description: Autentificación fallida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 401
+                message: "No estás autentificado. El token puede haber expirado"
+                error: "Invalid Token"
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 401
+                message: "Error interno del servidor"
+                error: "Internal Server Error"
+
+  /api/admin/moderacion:
+    get:
+      tags:
+        - Administrador
+      summary: Obtiene todas las publicaciones del sistema
+      description: Obtiene todas las publicaciones de todos los foros registrados en el sistema
+      operationId: moderarPublicaciones
+      responses:
+        '200':
+          description: Se han recuperado correctamente todas las publicaciones
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PublicacionesBase'
+        '401':
+          description: Autentificación fallida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 401
+                message: "No estás autentificado. El token puede haber expirado"
+                error: "Invalid Token"
+        '404':
+          description: Publicaciones no registradas en el sistema
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 404
+                message: "No hay registros de publicaciones en el sistema"
+                error: "Data Not Found"
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 401
+                message: "Error interno del servidor"
+                error: "Internal Server Error"
+
+  /api/admin/moderacion/{id}:
+    delete:
+      tags:
+        - Administrador
+      summary: Elimina la publicación indicada por parámetros
+      description: Elimina la publicación indicada por parámetros path de la petición
+      operationId: moderacionDeletePublicacion
+      parameters:
+        - name: user
+          in: query
+          required: true
+          schema:
+            type: string
+            example: "alvaro"
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '204':
+          description: Publicacion eliminada correctamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: true
+                status: 204
+                message: Eliminación de publicacion satisfactoria
+        '400':
+          description: Parámetros de la petición invalido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 400
+                message: "Los parámetros indicados en la petición no son correctos"
+                error: "Invalid Parameters"
+        '401':
+          description: Autentificación fallida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 401
+                message: "No estás autentificado. El token puede haber expirado"
+                error: "Invalid Token"
+        '404':
+          description: Error al eliminar una publicacion
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 404
+                message: "No se han encotrado publicacion cuyo identificador coincida con el esperado"
+                error: "Data Not Found"
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 401
+                message: "Error interno del servidor"
+                error: "Internal Server Error"
+
+  /api/social/foros:
+    get:
+      tags:
+        - Social
+      summary: Obtiene información de los foros creados
+      description: Obtiene información de los foros creados, junto con sus temas y publicaciones
+      operationId: obtenerForos
+      responses:
+        '200':
+          description: Obtención de foros exitosa
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForoBase'
+        '401':
+          description: Autentificación fallida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 401
+                message: "No estás autentificado. El token puede haber expirado"
+                error: "Invalid Token"
+        '404':
+          description: Error al obtener informacion de foros
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 404
+                message: "No se han encotrado foros registrados en el sistema"
+                error: "Data Not Found"
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 401
+                message: "Error interno del servidor"
+                error: "Internal Server Error"
+
+  /api/social/foros/{id}/temas:
+    get:
+      tags:
+        - Social
+      summary: Obtiene los temas incluidos en un foro
+      description: Obtiene los temas registrados en un foro
+      operationId: obtenerTemasForo
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          description: Temas asociados al foro obtenidos correctamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemasBase'
+        '400':
+          description: Parámetros de la petición invalido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 400
+                message: "Los parámetros indicados en la petición no son correctos"
+                error: "Invalid Parameters"
+        '401':
+          description: Autentificación fallida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 401
+                message: "No estás autentificado. El token puede haber expirado"
+                error: "Invalid Token"
+        '404':
+          description: Error al obtener los temas del foro indicado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 404
+                message: "No se han encotrado temas asociados al foro indicado"
+                error: "Data Not Found"
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 401
+                message: "Error interno del servidor"
+                error: "Internal Server Error"
+    post:
+      tags:
+        - Social
+      summary: Registro de temas asociados aun foro
+      description: Registra un nuevo tema sobre el foro indicado
+      operationId: registrarTemaForo
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      requestBody:
+        $ref: '#/components/requestBodies/ForoCreateBody'
+      responses:
+        '201':
+          description: Registrado un nuevo tema al foro indicado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: true
+                status: 201
+                message: "Se ha registrado un nuevo tema en el foro indicado"
+        '400':
+          description: Cuerpo de la peticion incorrecto
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 400
+                message: "El cuerpo de la petición es incorrecto"
+                error: "Bad Request"
+        '401':
+          description: Autentificación fallida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 401
+                message: "No estás autentificado. El token puede haber expirado"
+                error: "Invalid Token"
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 401
+                message: "Error interno del servidor"
+                error: "Internal Server Error"
+
+  /api/social/foros/{id}/publicacion:
+    get:
+      tags:
+        - Social
+      summary: Obtiene las publicaciones asociadas a un foro
+      description: Obtiene las publicaciones asociadas al foro indicado por parámetros
+      operationId: obtenerPublicacion
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          description: Publicaciones asociadas al foro obtenidas correctamente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PublicacionesBase'
+        '400':
+          description: Parámetros de la petición invalido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 400
+                message: "Los parámetros indicados en la petición no son correctos"
+                error: "Invalid Parameters"
+        '401':
+          description: Autentificación fallida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 401
+                message: "No estás autentificado. El token puede haber expirado"
+                error: "Invalid Token"
+        '404':
+          description: Error al obtener las publicaciones del foro indicado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 404
+                message: "No se han encotrado publicaciones asociados al foro indicado"
+                error: "Data Not Found"
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 401
+                message: "Error interno del servidor"
+                error: "Internal Server Error"
+    post:
+      tags:
+        - Social
+      summary: Registra una nueva publicacion sobre el foro
+      description: Registra una nueva publicacion sobre el foro indicado por parámetros
+      operationId: registrarPublicacion
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      requestBody:
+        $ref: '#/components/requestBodies/PublicacionesCreateBody'
+      responses:
+        '201':
+          description: Registrado una nueva publicación al foro indicado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: true
+                status: 201
+                message: "Se ha registrado una nueva publicación en el foro indicado"
+        '400':
+          description: Cuerpo de la peticion incorrecto
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 400
+                message: "El cuerpo de la petición es incorrecto"
+                error: "Bad Request"
+        '401':
+          description: Autentificación fallida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 401
+                message: "No estás autentificado. El token puede haber expirado"
+                error: "Invalid Token"
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 401
+                message: "Error interno del servidor"
+                error: "Internal Server Error"
+    delete:
+      tags:
+        - Social
+      summary: Elimina una publicacion del foro
+      description: Elimina una publicacion sobre el foro indicado
+      operationId: eliminarPublicacion
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '204':
+          description: Publicacion del foro eliminada correctamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: true
+                status: 204
+                message: Eliminación de publicacion satisfactoria
+        '400':
+          description: Parámetros de la petición invalido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 400
+                message: "Los parámetros indicados en la petición no son correctos"
+                error: "Invalid Parameters"
+        '401':
+          description: Autentificación fallida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 401
+                message: "No estás autentificado. El token puede haber expirado"
+                error: "Invalid Token"
+        '404':
+          description: Error al eliminar una peticion asociada al foro
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 404
+                message: "No se han encotrado publicacion cuyo identificador coincida con el esperado"
+                error: "Data Not Found"
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 401
+                message: "Error interno del servidor"
+                error: "Internal Server Error"
+
+  /api/encuentros:
+    get:
+      tags:
+        - Encuentros
+      summary: Obtiene los encuetros registrados en el sistema
+      description: Muestra al usuario todos los encuentros registrados en el sistema
+      operationId: obtenerEncuentros
+      responses:
+        '200':
+          description: Encuentros obtenidos correctamente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EncuentrosBase'
+        '400':
+          description: Parámetros de la petición invalido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 400
+                message: "Los parámetros indicados en la petición no son correctos"
+                error: "Invalid Parameters"
+        '401':
+          description: Autentificación fallida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 401
+                message: "No estás autentificado. El token puede haber expirado"
+                error: "Invalid Token"
+        '404':
+          description: Error al obtener los encuentros del sistema
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 404
+                message: "No se han encotrado encuentros"
+                error: "Data Not Found"
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 401
+                message: "Error interno del servidor"
+                error: "Internal Server Error"
+    post:
+      tags:
+        - Encuentros
+      summary: Registra un nuevo encuentro
+      description: Registra un nuevo encuentro en el sistema
+      operationId: registrarEncuentro
+      requestBody:
+        $ref: '#/components/requestBodies/EncuentroCreateBody'
+      responses:
+        '201':
+          description: Registrado un nuevo encuentro
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: true
+                status: 201
+                message: "Se ha registrado un nuevo encuentro de forma exitosa"
+        '400':
+          description: Cuerpo de la peticion incorrecto
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 400
+                message: "El cuerpo de la petición es incorrecto"
+                error: "Bad Request"
+        '401':
+          description: Autentificación fallida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 401
+                message: "No estás autentificado. El token puede haber expirado"
+                error: "Invalid Token"
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 401
+                message: "Error interno del servidor"
+                error: "Internal Server Error"
+
+  /api/encuentro/{id}:
+    patch:
+      tags:
+        - Encuentros
+      summary: Actualiza informacion de un encuentro
+      description: Actualiza informacion de un encuentro indicado por parametros
+      operationId: actualizarEncuentro
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      requestBody:
+        $ref: '#/components/requestBodies/EncuentroCreateBody'
+      responses:
+        '200':
+          description: Informacion de encuentro actualizada correctamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: true
+                status: 200
+                message: "Se ha actualizado correctamente el encuentro seleccionado"
+        '400':
+          description: Cuerpo de la peticion incorrecto
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 400
+                message: "El cuerpo de la petición es incorrecto"
+                error: "Bad Request"
+        '401':
+          description: Autentificación fallida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 401
+                message: "No estás autentificado. El token puede haber expirado"
+                error: "Invalid Token"
+        '404':
+          description: Error al obtener los encuentros del sistema
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 404
+                message: "No se han encotrado encuentros a actualizar"
+                error: "Data Not Found"
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 401
+                message: "Error interno del servidor"
+                error: "Internal Server Error"
+
+    delete:
+      tags:
+        - Encuentros
+      summary: Elimina un encuentro del sistema
+      description: Elimina el encuentro indicado en los parámetros de la petición
+      operationId: eliminarEncuentro
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '204':
+          description: Encuentro eliminado correctamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: true
+                status: 204
+                message: Eliminación de publicacion satisfactoria
+        '400':
+          description: Parámetros de la petición invalido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 400
+                message: "Los parámetros indicados en la petición no son correctos"
+                error: "Invalid Parameters"
+        '401':
+          description: Autentificación fallida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 401
+                message: "No estás autentificado. El token puede haber expirado"
+                error: "Invalid Token"
+        '404':
+          description: Error al eliminar una peticion asociada al foro
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 404
+                message: "No se han encotrado publicacion cuyo identificador coincida con el esperado"
+                error: "Data Not Found"
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 401
+                message: "Error interno del servidor"
+                error: "Internal Server Error"
+
+  /api/encuentros/{id}/foro:
+    post:
+      tags:
+        - Encuentros
+      summary: Crea un foro asociado al encuentro
+      description: Dado el encuentro indicado en los parámetros de la petición, crea el
+        foro asociado
+      operationId: registrarForoEncuentro
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      requestBody:
+        $ref: '#/components/requestBodies/ForoCreateBody'
+      responses:
+        '201':
+          description: Registrado el foro asociado al encuentro
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: true
+                status: 201
+                message: "Se ha registrado un foro asociado al encuentro indicado de forma exitosa"
+        '400':
+          description: Cuerpo de la peticion incorrecto
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 400
+                message: "El cuerpo de la petición es incorrecto"
+                error: "Bad Request"
+        '401':
+          description: Autentificación fallida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 401
+                message: "No estás autentificado. El token puede haber expirado"
+                error: "Invalid Token"
+        '404':
+          description: Error al crear el foro asociado al encuentro
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 404
+                message: "No se ha encontrado el encuentro indicado por parámetros"
+                error: "Data Not Found"
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 401
+                message: "Error interno del servidor"
+                error: "Internal Server Error"
+
+  /api/encuentros/{id}/asistencia:
+    get:
+      tags:
+        - Encuentros
+      summary: Obtener asistencia de un encuentro
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          description: Asistencia obtenida correctamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AsistenciaBase'
+        '400':
+          description: Cuerpo de la peticion incorrecto
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 400
+                message: "El cuerpo de la petición es incorrecto"
+                error: "Bad Request"
+        '401':
+          description: Autentificación fallida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 401
+                message: "No estás autentificado. El token puede haber expirado"
+                error: "Invalid Token"
+        '404':
+          description: Error al crear la asistencia asociada al encuentro
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 404
+                message: "No se ha encontrado el encuentro indicado por parámetros"
+                error: "Data Not Found"
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 401
+                message: "Error interno del servidor"
+                error: "Internal Server Error"
+    post:
+      tags:
+        - Encuentros
+      summary: Crear asistencia para un encuentro
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      requestBody:
+        $ref: '#/components/requestBodies/AsistenciaCreateBody'
+      responses:
+        '201':
+          description: Asistencia creada correctamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AsistenciaBase'
+        '400':
+          description: Cuerpo de la peticion incorrecto
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 400
+                message: "El cuerpo de la petición es incorrecto"
+                error: "Bad Request"
+        '401':
+          description: Autentificación fallida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 401
+                message: "No estás autentificado. El token puede haber expirado"
+                error: "Invalid Token"
+        '404':
+          description: Error al crear la asistencia asociada al encuentro
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 404
+                message: "No se ha encontrado el encuentro indicado por parámetros"
+                error: "Data Not Found"
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 401
+                message: "Error interno del servidor"
+                error: "Internal Server Error"
+    delete:
+      tags:
+        - Encuentros
+      summary: Eliminar asistencia
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '204':
+          description: Asistencia eliminada correctamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: true
+                status: 204
+                message: "Se ha eliminado correctamente la asistencia"
+        '400':
+          description: Cuerpo de la peticion incorrecto
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 400
+                message: "El cuerpo de la petición es incorrecto"
+                error: "Bad Request"
+        '401':
+          description: Autentificación fallida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 401
+                message: "No estás autentificado. El token puede haber expirado"
+                error: "Invalid Token"
+        '404':
+          description: Error al crear la asistencia asociada al encuentro
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 404
+                message: "No se ha encontrado el encuentro indicado por parámetros"
+                error: "Data Not Found"
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalResponseSchema'
+              example:
+                success: false
+                status: 401
+                message: "Error interno del servidor"
+                error: "Internal Server Error"
+
+components:
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  requestBodies:
+
+    ForoCreateBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/TemasBase'
+
+    MascotaCreateBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/MascotasBase'
+
+    UsuarioCreateBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UsuarioBase'
+
+    UsuarioUpdate:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UsuarioBase'
+
+    SponsorCreateBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/SponsorBase'
+              - type: object
+                required:
+                  - username
+                  - password
+                  - email
+                  - NIF
+    SponsorUpdate:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SponsorBase'
+
+
+    PublicacionesCreateBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/PublicacionesBase'
+              - required:
+                  - titulo
+                  - texto
+
+    TipoMascotaCreateBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/TipoMascotaBase'
+                required:
+                  - nombre
+                  - codigo
+
+
+    CiudadCreateBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/CiudadBase'
+                required:
+                  - nombre
+                  - codigo
+
+    AsistenciaCreateBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AsistenciaBase'
+
+    EncuentroCreateBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/EncuentrosBase'
+
+  parameters:
+    IdParam:
+      name: id
+      in: path
+      required: true
+      description: Identificador de la entidad
+      schema:
+        type: string
+
+  schemas:
+
+    MascotasBase:
+      type: object
+      properties:
+        nombre:
+          type: string
+          example: "Huesos"
+        raza:
+          $ref: '#/components/schemas/TipoMascotaBase'
+        descripcion:
+          type: string
+          example: "Perro agresivo"
+        foto:
+          type: string
+          format: binary
+
+    GlobalResponseSchema:
+      type: object
+      required:
+        - success
+        - status
+        - message
+      properties:
+        success:
+          type: boolean
+          example: true
+        status:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: "Operación realizada correctamente"
+        error:
+          type: string
+          example: "Bad Request"
+
+    AsistenciaBase:
+      type: object
+      required:
+        - contador_usuarios
+        - contador_mascotas
+      properties:
+        contador_usuarios:
+          type: integer
+          example: 10
+        contador_mascotas:
+          type: integer
+          example: 7
+        nota:
+          type: string
+          example: "Evento tranquilo"
+
+    EncuentrosBase:
+      type: object
+      properties:
+        fecha:
+          type: string
+          format: date
+          example: "2026-01-01"
+        localizacion:
+          type: string
+          example: "Plaza Mayor"
+        tipo_animal:
+          type: array
+          items:
+            type: string
+          example: ["Perros", "Gatos"]
+        limite_usuarios:
+          type: integer
+          minimum: 0
+          maximum: 10
+          default: 5
+        duracion_minutes:
+          type: integer
+          example: 60
+        descripcion:
+          type: string
+          example: "Encuentro solidario"
+        titulo:
+          type: string
+          example: "Solitae"
+
+    Encuentro:
+      allOf:
+        - $ref: '#/components/schemas/EncuentrosBase'
+        - type: object
+          properties:
+            asistencias:
+              $ref: '#/components/schemas/AsistenciaBase'
+
+    ForoBase:
+      type: object
+      properties:
+        tipo_foro:
+          type: string
+          example: "Consultoría"
+        titulo:
+          type: string
+          example: "Consultorias Paw-Meet"
+        publicaciones:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicacionesBase'
+        temas:
+          type: array
+          items:
+            $ref: '#/components/schemas/TemasBase'
+
+    TemasBase:
+      type: object
+      properties:
+        nombre:
+          type: string
+          example: "Enfermedades"
+        foro:
+          type: string
+          example: "cf359bb6-bd5d-4edb-ba8b-31ca877de232"
+
+    PublicacionesBase:
+      type: object
+      properties:
+        titulo:
+          type: string
+          example: "Habitos diarios"
+        texto:
+          type: string
+          example: "¿Cuales so vuestros hábitos diarios al paseas a vuestras mascotas? El mio..."
+        foto:
+          type: string
+          format: binary
+        fecha_creacion:
+          type: string
+          format: datetime
+        likes:
+          type: integer
+          example: 0
+
+    UsuarioBase:
+      type: object
+      properties:
+        username:
+          type: string
+          example: "Alvaro"
+        email:
+          type: string
+          example: "amendoma@alumnos.unex.es"
+        biography:
+          type: string
+          example: "Simpatico"
+        foto:
+          type: string
+          format: binary
+        ciudad:
+          type: string
+          example: "Caceres"
+
+    CiudadBase:
+      type: object
+      properties:
+        nombre:
+          type: string
+          example: "Caceres"
+        codigo:
+          type: string
+          example: "CC"
+
+    SponsorBase:
+      type: object
+      properties:
+        username:
+          type: string
+          example: "ep"
+        password:
+          type: string
+          example: "5432"
+        email:
+          type: string
+          example: "uex@alumnos.unex.es"
+        nombre:
+          type: string
+          example: "Escuela Politecnica"
+        activo:
+          type: boolean
+          example: true
+        NIF:
+          type: string
+          example: "Q0618001B"
+
+    Usuario:
+      allOf:
+        - $ref: '#/components/schemas/UsuarioBase'
+
+    AuthResponse:
+      type: object
+      properties:
+        access_token:
+          type: string
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        token_type:
+          type: string
+          example: "Bearer"
+        expires_in:
+          type: integer
+          example: 3600
+
+    Login:
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+          example: "Peterbot"
+        password:
+          type: string
+          example: "abc1234"
+
+    Registro:
+      type: object
+      required:
+        - nombre
+        - correo_electronico
+        - password
+      properties:
+        nombre:
+          type: string
+          example: "Peterbot"
+        correo_electronico:
+          type: string
+          format: email
+          example: "correo@email.com"
+        password:
+          type: string
+          example: "abcd1234"
+        biografia:
+          type: string
+          example: "Amante de los animales"
+        foto:
+          type: string
+          format: binary
+
+    UpdateUser:
+      type: object
+      properties:
+        nombre:
+          type: string
+          example: "Alvaro"
+        biografia:
+          type: string
+          example: "Nueva bio"
+        foto:
+          type: string
+          format: binary
+
+    RegistroMascota:
+      type: object
+      required:
+        - nombre
+        - tipo
+      properties:
+        nombre:
+          type: string
+          example: "Huesos"
+        tipo:
+          $ref: '#/components/schemas/TipoMascotaBase'
+
+    Mascota:
+      type: object
+      properties:
+        nombre:
+          type: string
+          example: "Huesos"
+        tipo:
+          $ref: '#/components/schemas/TipoMascotaBase'
+
+    TipoMascotaBase:
+      type: object
+      properties:
+        nombre:
+          type: string
+          example: "Canino"
+        codigo:
+          type: string
+          example: "R01"

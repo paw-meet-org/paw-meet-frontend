@@ -1,5 +1,71 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## OpenAPI -> cliente TypeScript
+
+Este proyecto genera un cliente TS desde `generated/openapi.yaml`.
+
+- Salida generada: `generated/api-client/`
+- Reexport estable: `generated/api/index.ts`
+
+Comandos:
+
+```bash
+npm run api:generate
+npm run api:generate:clean
+```
+
+Ejemplo de uso:
+
+```ts
+import { OpenAPI, UsuarioService } from "@/generated/api";
+
+OpenAPI.BASE = "http://localhost:8000";
+OpenAPI.TOKEN = "<jwt>";
+
+const auth = await UsuarioService.login({
+  username: "demo",
+  password: "demo",
+});
+```
+
+## Estado global con Zustand
+
+Se anadio Zustand para gestionar el estado del frontend por dominios.
+
+- `stores/auth.store.ts`: login, token, sesion y errores de autenticacion.
+- `stores/encuentros.store.ts`: listado de encuentros, cache temporal y creacion.
+- `stores/request-state.ts`: tipos comunes para estados de peticion.
+
+Ejemplo rapido en un componente cliente:
+
+```tsx
+"use client";
+
+import { useEffect } from "react";
+import { useEncuentrosStore } from "@/stores";
+
+export function EncuentrosList() {
+  const { encuentros, isLoading, error, fetchEncuentros } = useEncuentrosStore();
+
+  useEffect(() => {
+    void fetchEncuentros();
+  }, [fetchEncuentros]);
+
+  if (isLoading) return <p>Cargando...</p>;
+  if (error) return <p>Error: {error}</p>;
+
+  return (
+    <ul>
+      {encuentros.map((encuentro, index) => (
+        <li key={`${encuentro.titulo ?? "encuentro"}-${index}`}>
+          {encuentro.titulo ?? "Sin titulo"}
+        </li>
+      ))}
+    </ul>
+  );
+}
+```
+
 ## Getting Started
 
 First, run the development server:
