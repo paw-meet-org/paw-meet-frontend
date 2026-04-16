@@ -14,16 +14,22 @@ export default function Home() {
         </p>
         <div className="flex flex-col gap-3 sm:flex-row">
           <a
-            href="#"
+            href="/registro"
             className="rounded-xl bg-orange-500 px-6 py-3 font-semibold text-white shadow-sm transition hover:bg-orange-600"
           >
-            Empezar ahora
+            Crear cuenta
           </a>
           <a
-            href="/smoke"
+            href="/login"
             className="rounded-xl border border-blue-300 bg-blue-50 px-6 py-3 font-semibold text-blue-800 transition hover:bg-blue-100"
           >
-            Probar integracion
+            Iniciar sesion
+          </a>
+          <a
+            href="/perfil"
+            className="rounded-xl border border-blue-300 bg-white px-6 py-3 font-semibold text-blue-800 transition hover:bg-blue-50"
+          >
+            Mi perfil
           </a>
         </div>
         <div className="w-full max-w-3xl rounded-2xl border border-blue-100 bg-blue-50 p-6 text-left">

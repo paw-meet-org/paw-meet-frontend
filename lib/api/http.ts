@@ -1,3 +1,5 @@
+import { getTokenFromStorage } from "@/lib/auth-session";
+
 export class HttpError extends Error {
   status: number;
   details: unknown;
@@ -14,10 +16,13 @@ export async function apiFetch<T>(
   input: string,
   init?: RequestInit
 ): Promise<T> {
+  const token = getTokenFromStorage();
+
   const response = await fetch(input, {
     ...init,
     headers: {
       "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...(init?.headers ?? {}),
     },
   });

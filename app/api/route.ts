@@ -5,6 +5,8 @@ export async function GET() {
     endpoints: [
       { method: "GET", path: "/api/backend/health" },
       { method: "POST", path: "/api/login" },
+      { method: "POST", path: "/api/registro" },
+      { method: "GET, PATCH", path: "/api/user" },
       { method: "GET", path: "/api/encuentros" },
       { method: "POST", path: "/api/encuentros" },
       { method: "GET", path: "/api/user/mascotas" },
