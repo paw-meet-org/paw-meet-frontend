@@ -1,11 +1,10 @@
-import { UsuarioService, type Login } from "@/generated/api";
+import { AdministradorService } from "@/generated/api";
 import { configureOpenApiFromRequest, mapApiError } from "@/lib/api-client-server";
 
-export async function POST(request: Request) {
+export async function GET(request: Request) {
   try {
     configureOpenApiFromRequest(request);
-    const payload = (await request.json()) as Login;
-    const data = await UsuarioService.login(payload);
+    const data = await AdministradorService.moderarPublicaciones();
     return Response.json(data, { status: 200 });
   } catch (error) {
     return mapApiError(error);

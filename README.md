@@ -34,6 +34,9 @@ Se anadio Zustand para gestionar el estado del frontend por dominios.
 
 - `stores/auth.store.ts`: login, token, sesion y errores de autenticacion.
 - `stores/encuentros.store.ts`: listado de encuentros, cache temporal y creacion.
+- `stores/mascotas.store.ts`: listado/registro de mascotas del usuario.
+- `stores/social.store.ts`: foros, temas y publicaciones.
+- `stores/admin.store.ts`: usuarios, sponsors, ciudades, razas y moderacion.
 - `stores/request-state.ts`: tipos comunes para estados de peticion.
 
 Ejemplo rapido en un componente cliente:
@@ -65,6 +68,26 @@ export function EncuentrosList() {
   );
 }
 ```
+
+## Backend local y comprobación E2E
+
+El backend dockerizado se encuentra en `env/backend_produccion` (ahora ignorado en git).
+
+1) Levantar backend:
+
+```bash
+cd env/backend_produccion
+docker compose up -d postgres pawmeet
+```
+
+2) Levantar frontend apuntando al backend local:
+
+```bash
+cd /home/awahiid/proyectos/iw/paw-meet-frontend
+API_BASE_URL=http://localhost:8003 npm run dev
+```
+
+3) Abrir `http://localhost:3000/smoke` y ejecutar pruebas de endpoints.
 
 ## Getting Started
 

@@ -20,10 +20,10 @@ export default function Home() {
             Empezar ahora
           </a>
           <a
-            href="#"
+            href="/smoke"
             className="rounded-xl border border-blue-300 bg-blue-50 px-6 py-3 font-semibold text-blue-800 transition hover:bg-blue-100"
           >
-            Ver roadmap
+            Probar integracion
           </a>
         </div>
         <div className="w-full max-w-3xl rounded-2xl border border-blue-100 bg-blue-50 p-6 text-left">
