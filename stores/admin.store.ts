@@ -1,21 +1,15 @@
-import type {
-  CiudadBase,
-  GlobalResponseSchema,
-  PublicacionesBase,
-  SponsorBase,
-  TipoMascotaBase,
-  Usuario,
-  UsuarioBase,
-} from "@/generated/api";
-import { apiFetch, HttpError } from "@/lib/api/http";
+import type { CiudadBase } from "@/generated/api-client/models/CiudadBase";
+import type { GlobalResponseSchema } from "@/generated/api-client/models/GlobalResponseSchema";
+import type { SponsorBase } from "@/generated/api-client/models/SponsorBase";
+import type { Usuario } from "@/generated/api-client/models/Usuario";
+import type { UsuarioBase } from "@/generated/api-client/models/UsuarioBase";
 import { create } from "zustand";
+import { AdministradorService } from "@/generated/api-client/services/AdministradorService";
 
 type AdminStore = {
   usuarios: Usuario[];
   sponsors: SponsorBase[];
   ciudades: CiudadBase[];
-  razas: TipoMascotaBase[];
-  moderacion: PublicacionesBase[];
   isLoading: boolean;
   error: string | null;
   fetchUsuarios: () => Promise<Usuario[]>;
@@ -28,10 +22,6 @@ type AdminStore = {
   deleteSponsor: (id: string) => Promise<void>;
   fetchCiudades: () => Promise<CiudadBase[]>;
   createCiudad: (payload: CiudadBase) => Promise<GlobalResponseSchema>;
-  fetchRazas: () => Promise<TipoMascotaBase[]>;
-  createRaza: (payload: TipoMascotaBase) => Promise<GlobalResponseSchema>;
-  fetchModeracion: () => Promise<PublicacionesBase[]>;
-  deleteModeracionPublicacion: (id: string, user: string) => Promise<void>;
   clearError: () => void;
 };
 
@@ -39,243 +29,120 @@ export const useAdminStore = create<AdminStore>((set, get) => ({
   usuarios: [],
   sponsors: [],
   ciudades: [],
-  razas: [],
-  moderacion: [],
   isLoading: false,
   error: null,
   async fetchUsuarios() {
     set({ isLoading: true, error: null });
-
     try {
-      const data = await apiFetch<Usuario[]>("/api/admin/users");
+      const data = await AdministradorService.obtenerUsuarios();
       set({ usuarios: data, isLoading: false, error: null });
       return data;
     } catch (error) {
-      const message =
-        error instanceof HttpError ? error.message : "Error al cargar usuarios";
-      set({ isLoading: false, error: message });
+      set({ isLoading: false, error: String(error) });
       throw error;
     }
   },
   async createUsuario(payload) {
     set({ isLoading: true, error: null });
-
     try {
-      const response = await apiFetch<GlobalResponseSchema>("/api/admin/users", {
-        method: "POST",
-        body: JSON.stringify(payload),
-      });
+      const response = await AdministradorService.registrarUsuario(payload);
       await get().fetchUsuarios();
       set({ isLoading: false, error: null });
       return response;
     } catch (error) {
-      const message =
-        error instanceof HttpError ? error.message : "Error al crear usuario";
-      set({ isLoading: false, error: message });
+      set({ isLoading: false, error: String(error) });
       throw error;
     }
   },
   async updateUsuario(id, payload) {
     set({ isLoading: true, error: null });
-
     try {
-      const response = await apiFetch<GlobalResponseSchema>(`/api/admin/users/${id}`, {
-        method: "PATCH",
-        body: JSON.stringify(payload),
-      });
+      const response = await AdministradorService.actualizarUsuario(id, payload);
       await get().fetchUsuarios();
       set({ isLoading: false, error: null });
       return response;
     } catch (error) {
-      const message =
-        error instanceof HttpError
-          ? error.message
-          : "Error al actualizar usuario";
-      set({ isLoading: false, error: message });
+      set({ isLoading: false, error: String(error) });
       throw error;
     }
   },
   async deleteUsuario(id) {
     set({ isLoading: true, error: null });
-
     try {
-      await apiFetch<null>(`/api/admin/users/${id}`, { method: "DELETE" });
+      await AdministradorService.deleteUsuario(id);
       await get().fetchUsuarios();
       set({ isLoading: false, error: null });
     } catch (error) {
-      const message =
-        error instanceof HttpError ? error.message : "Error al eliminar usuario";
-      set({ isLoading: false, error: message });
+      set({ isLoading: false, error: String(error) });
       throw error;
     }
   },
   async fetchSponsors() {
     set({ isLoading: true, error: null });
-
     try {
-      const data = await apiFetch<SponsorBase[]>("/api/admin/sponsors");
+      const data = await AdministradorService.obtenerSponsors();
       set({ sponsors: data, isLoading: false, error: null });
       return data;
     } catch (error) {
-      const message =
-        error instanceof HttpError ? error.message : "Error al cargar sponsors";
-      set({ isLoading: false, error: message });
+      set({ isLoading: false, error: String(error) });
       throw error;
     }
   },
   async createSponsor(payload) {
     set({ isLoading: true, error: null });
-
     try {
-      const response = await apiFetch<GlobalResponseSchema>(
-        "/api/admin/sponsors",
-        {
-          method: "POST",
-          body: JSON.stringify(payload),
-        }
-      );
+      const response = await AdministradorService.registrarSponsor(payload);
       await get().fetchSponsors();
       set({ isLoading: false, error: null });
       return response;
     } catch (error) {
-      const message =
-        error instanceof HttpError ? error.message : "Error al crear sponsor";
-      set({ isLoading: false, error: message });
+      set({ isLoading: false, error: String(error) });
       throw error;
     }
   },
   async updateSponsor(id, payload) {
     set({ isLoading: true, error: null });
-
     try {
-      const response = await apiFetch<GlobalResponseSchema>(
-        `/api/admin/sponsors/${id}`,
-        {
-          method: "PATCH",
-          body: JSON.stringify(payload),
-        }
-      );
+      const response = await AdministradorService.actualizarSponsor(id, payload);
       await get().fetchSponsors();
       set({ isLoading: false, error: null });
       return response;
     } catch (error) {
-      const message =
-        error instanceof HttpError
-          ? error.message
-          : "Error al actualizar sponsor";
-      set({ isLoading: false, error: message });
+      set({ isLoading: false, error: String(error) });
       throw error;
     }
   },
   async deleteSponsor(id) {
     set({ isLoading: true, error: null });
-
     try {
-      await apiFetch<null>(`/api/admin/sponsors/${id}`, { method: "DELETE" });
+      await AdministradorService.deleteSponsor(id);
       await get().fetchSponsors();
       set({ isLoading: false, error: null });
     } catch (error) {
-      const message =
-        error instanceof HttpError ? error.message : "Error al eliminar sponsor";
-      set({ isLoading: false, error: message });
+      set({ isLoading: false, error: String(error) });
       throw error;
     }
   },
   async fetchCiudades() {
     set({ isLoading: true, error: null });
-
     try {
-      const data = await apiFetch<CiudadBase[]>("/api/admin/ciudades");
+      const data = await AdministradorService.obtenerCiudades();
       set({ ciudades: data, isLoading: false, error: null });
       return data;
     } catch (error) {
-      const message =
-        error instanceof HttpError ? error.message : "Error al cargar ciudades";
-      set({ isLoading: false, error: message });
+      set({ isLoading: false, error: String(error) });
       throw error;
     }
   },
   async createCiudad(payload) {
     set({ isLoading: true, error: null });
-
     try {
-      const response = await apiFetch<GlobalResponseSchema>("/api/admin/ciudades", {
-        method: "POST",
-        body: JSON.stringify(payload),
-      });
+      const response = await AdministradorService.registrarCiudad(payload);
       await get().fetchCiudades();
       set({ isLoading: false, error: null });
       return response;
     } catch (error) {
-      const message =
-        error instanceof HttpError ? error.message : "Error al crear ciudad";
-      set({ isLoading: false, error: message });
-      throw error;
-    }
-  },
-  async fetchRazas() {
-    set({ isLoading: true, error: null });
-
-    try {
-      const data = await apiFetch<TipoMascotaBase[]>("/api/admin/razas");
-      set({ razas: data, isLoading: false, error: null });
-      return data;
-    } catch (error) {
-      const message =
-        error instanceof HttpError ? error.message : "Error al cargar razas";
-      set({ isLoading: false, error: message });
-      throw error;
-    }
-  },
-  async createRaza(payload) {
-    set({ isLoading: true, error: null });
-
-    try {
-      const response = await apiFetch<GlobalResponseSchema>("/api/admin/razas", {
-        method: "POST",
-        body: JSON.stringify(payload),
-      });
-      await get().fetchRazas();
-      set({ isLoading: false, error: null });
-      return response;
-    } catch (error) {
-      const message =
-        error instanceof HttpError ? error.message : "Error al crear raza";
-      set({ isLoading: false, error: message });
-      throw error;
-    }
-  },
-  async fetchModeracion() {
-    set({ isLoading: true, error: null });
-
-    try {
-      const data = await apiFetch<PublicacionesBase[]>("/api/admin/moderacion");
-      set({ moderacion: data, isLoading: false, error: null });
-      return data;
-    } catch (error) {
-      const message =
-        error instanceof HttpError
-          ? error.message
-          : "Error al cargar moderacion";
-      set({ isLoading: false, error: message });
-      throw error;
-    }
-  },
-  async deleteModeracionPublicacion(id, user) {
-    set({ isLoading: true, error: null });
-
-    try {
-      await apiFetch<null>(`/api/admin/moderacion/${id}?user=${encodeURIComponent(user)}`, {
-        method: "DELETE",
-      });
-      await get().fetchModeracion();
-      set({ isLoading: false, error: null });
-    } catch (error) {
-      const message =
-        error instanceof HttpError
-          ? error.message
-          : "Error al eliminar publicacion";
-      set({ isLoading: false, error: message });
+      set({ isLoading: false, error: String(error) });
       throw error;
     }
   },
@@ -283,4 +150,3 @@ export const useAdminStore = create<AdminStore>((set, get) => ({
     set({ error: null });
   },
 }));
-
