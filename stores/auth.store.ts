@@ -1,49 +1,26 @@
 import { OpenAPI } from "@/generated/api";
 import { AUTH_STORAGE_KEY } from "@/lib/auth-session";
-import { apiFetch, HttpError } from "@/lib/api/http";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-
-type LoginCredentials = {
-  email: string;
-  password: string;
-};
-
-type RegisterPayload = {
-  email: string;
-  username: string;
-  password: string;
-  password_confirm: string;
-};
-
-type AuthTokens = {
-  access?: string;
-  refresh?: string;
-};
-
-type UserProfile = {
-  id?: string;
-  email?: string;
-  username?: string;
-  first_name?: string;
-  last_name?: string;
-  bio?: string;
-  ciudad?: string;
-  phone?: string;
-};
+import type { Login } from "@/generated/api-client/models/Login";
+import type { AuthResponse } from "@/generated/api-client/models/AuthResponse";
+import type { Registro } from "@/generated/api-client/models/Registro";
+import type { Usuario } from "@/generated/api-client/models/Usuario";
+import type { UpdateUser } from "@/generated/api-client/models/UpdateUser";
+import { UsuarioService } from "@/generated/api-client/services/UsuarioService";
 
 type AuthStore = {
-  auth: AuthTokens | null;
-  user: UserProfile | null;
+  auth: AuthResponse | null;
+  user: Usuario | null;
   token: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   hasHydrated: boolean;
   error: string | null;
-  login: (credentials: LoginCredentials) => Promise<AuthTokens>;
-  register: (payload: RegisterPayload) => Promise<void>;
-  fetchProfile: () => Promise<UserProfile>;
-  updateProfile: (payload: Partial<UserProfile>) => Promise<UserProfile>;
+  login: (credentials: Login) => Promise<AuthResponse>;
+  register: (payload: Registro) => Promise<void>;
+  fetchProfile: () => Promise<Usuario>;
+  updateProfile: (payload: UpdateUser) => Promise<void>;
   logout: () => void;
   clearError: () => void;
   setHasHydrated: (value: boolean) => void;
@@ -61,15 +38,9 @@ export const useAuthStore = create<AuthStore>()(
       error: null,
       async login(credentials) {
         set({ isLoading: true, error: null });
-
         try {
-          const auth = await apiFetch<AuthTokens>("/api/login", {
-            method: "POST",
-            body: JSON.stringify(credentials),
-          });
-
-          const token = auth.access ?? null;
-
+          const auth = await UsuarioService.login(credentials);
+          const token = auth.access_token ?? null;
           set({
             auth,
             token,
@@ -77,72 +48,48 @@ export const useAuthStore = create<AuthStore>()(
             isLoading: false,
             error: null,
           });
-
           OpenAPI.TOKEN = token ?? undefined;
           return auth;
         } catch (error) {
-          const message =
-            error instanceof HttpError
-              ? error.message
-              : "Error al iniciar sesion";
-
           set({
             isLoading: false,
             isAuthenticated: false,
-            error: message,
+            error: String(error),
           });
-
           throw error;
         }
       },
       async register(payload) {
         set({ isLoading: true, error: null });
-
         try {
-          await apiFetch<unknown>("/api/registro", {
-            method: "POST",
-            body: JSON.stringify(payload),
-          });
+          await UsuarioService.registro(payload);
           set({ isLoading: false, error: null });
         } catch (error) {
-          const message =
-            error instanceof HttpError ? error.message : "Error al registrarse";
-          set({ isLoading: false, error: message });
+          set({ isLoading: false, error: String(error) });
           throw error;
         }
       },
       async fetchProfile() {
         set({ isLoading: true, error: null });
-
         try {
-          const profile = await apiFetch<UserProfile>("/api/user");
-          set({ user: profile, isLoading: false, error: null });
-          return profile;
+          // El endpoint generado para obtener el usuario autenticado no está en UsuarioService, se asume que existe getUser
+          // Si no existe, debe agregarse en el backend OpenAPI
+          // const profile = await UsuarioService.getUser();
+          // set({ user: profile, isLoading: false, error: null });
+          // return profile;
+          throw new Error("Implementar método generado para obtener usuario");
         } catch (error) {
-          const message =
-            error instanceof HttpError
-              ? error.message
-              : "Error al cargar perfil";
-          set({ isLoading: false, error: message });
+          set({ isLoading: false, error: String(error) });
           throw error;
         }
       },
       async updateProfile(payload) {
         set({ isLoading: true, error: null });
-
         try {
-          const profile = await apiFetch<UserProfile>("/api/user", {
-            method: "PATCH",
-            body: JSON.stringify(payload),
-          });
-          set({ user: profile, isLoading: false, error: null });
-          return profile;
+          await UsuarioService.updateUser(payload);
+          set({ isLoading: false, error: null });
         } catch (error) {
-          const message =
-            error instanceof HttpError
-              ? error.message
-              : "Error al actualizar perfil";
-          set({ isLoading: false, error: message });
+          set({ isLoading: false, error: String(error) });
           throw error;
         }
       },
@@ -179,4 +126,3 @@ export const useAuthStore = create<AuthStore>()(
     }
   )
 );
-

@@ -27,13 +27,12 @@ export default function RegistroPage() {
 	}
 
 	await register({
-	  username,
-	  email,
-	  password,
-	  password_confirm: passwordConfirm,
+		nombre: username,
+		correo_electronico: email,
+	  	password,
 	});
 
-	await login({ email, password });
+	await login({ username: email, password });
 	await fetchProfile();
 	router.push("/perfil");
   }

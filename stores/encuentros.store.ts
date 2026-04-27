@@ -1,6 +1,8 @@
-import type { EncuentrosBase, GlobalResponseSchema } from "@/generated/api";
-import { apiFetch, HttpError } from "@/lib/api/http";
+
 import { create } from "zustand";
+import type { EncuentrosBase } from "@/generated/api-client/models/EncuentrosBase";
+import type { GlobalResponseSchema } from "@/generated/api-client/models/GlobalResponseSchema";
+import { EncuentrosService } from "@/generated/api-client/services/EncuentrosService";
 
 type EncuentrosStore = {
   encuentros: EncuentrosBase[];
@@ -31,9 +33,8 @@ export const useEncuentrosStore = create<EncuentrosStore>((set, get) => ({
     }
 
     set({ isLoading: true, error: null });
-
     try {
-      const data = await apiFetch<EncuentrosBase[]>("/api/encuentros");
+      const data = await EncuentrosService.obtenerEncuentros();
       set({
         encuentros: data,
         lastUpdatedAt: Date.now(),
@@ -42,35 +43,19 @@ export const useEncuentrosStore = create<EncuentrosStore>((set, get) => ({
       });
       return data;
     } catch (error) {
-      const message =
-        error instanceof HttpError
-          ? error.message
-          : "Error al cargar encuentros";
-
-      set({ isLoading: false, error: message });
+      set({ isLoading: false, error: String(error) });
       throw error;
     }
   },
   async createEncuentro(payload) {
     set({ isLoading: true, error: null });
-
     try {
-      const response = await apiFetch<GlobalResponseSchema>("/api/encuentros", {
-        method: "POST",
-        body: JSON.stringify(payload),
-      });
-
-      // Force refresh after a mutation to keep the local cache in sync.
+      const response = await EncuentrosService.registrarEncuentro(payload);
       await get().fetchEncuentros(true);
       set({ isLoading: false, error: null });
       return response;
     } catch (error) {
-      const message =
-        error instanceof HttpError
-          ? error.message
-          : "Error al crear el encuentro";
-
-      set({ isLoading: false, error: message });
+      set({ isLoading: false, error: String(error) });
       throw error;
     }
   },

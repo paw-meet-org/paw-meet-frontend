@@ -30,15 +30,15 @@ export function Navigation() {
 
   return (
     <nav className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-3">
-      <Link href="/" className="text-lg font-bold text-blue-900">
-        Paw Meet
+      <Link href="/" className="text-xl font-bold text-slate-800 flex items-center gap-2">
+        <span className="text-2xl">🐾</span> Paw Meet
       </Link>
       <div className="flex flex-wrap items-center gap-2">
         {visibleNavItems.map((item) => (
           <Link
             key={item.href}
             href={item.href}
-            className="rounded-md border border-blue-200 px-3 py-1.5 text-sm font-medium text-blue-800 transition hover:bg-blue-50"
+            className="rounded-lg border border-transparent px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-100 hover:text-slate-900"
           >
             {item.label}
           </Link>
@@ -46,7 +46,7 @@ export function Navigation() {
         {mounted && hasHydrated && isAuthenticated && (
             <button
               onClick={() => logout()}
-              className="rounded-md border border-red-200 bg-red-50 px-3 py-1.5 text-sm font-medium text-red-800 transition hover:bg-red-100"
+              className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm font-medium text-red-600 transition hover:bg-red-100 hover:text-red-700"
             >
               Cerrar sesión
             </button>

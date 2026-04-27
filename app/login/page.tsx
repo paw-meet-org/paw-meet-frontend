@@ -15,7 +15,7 @@ export default function LoginPage() {
 	event.preventDefault();
 	clearError();
 
-	await login({ email, password });
+	await login({ username: email, password });
 	await fetchProfile();
 	router.push("/perfil");
   }

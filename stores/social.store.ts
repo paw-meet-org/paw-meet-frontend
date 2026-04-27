@@ -1,10 +1,8 @@
-import type {
-  ForoBase,
-  GlobalResponseSchema,
-  PublicacionesBase,
-  TemasBase,
-} from "@/generated/api";
-import { apiFetch, HttpError } from "@/lib/api/http";
+import type { ForoBase } from "@/generated/api-client/models/ForoBase";
+import type { TemasBase } from "@/generated/api-client/models/TemasBase";
+import type { PublicacionesBase } from "@/generated/api-client/models/PublicacionesBase";
+import type { GlobalResponseSchema } from "@/generated/api-client/models/GlobalResponseSchema";
+import { SocialService } from "@/generated/api-client/services/SocialService";
 import { create } from "zustand";
 
 type SocialStore = {
@@ -17,10 +15,7 @@ type SocialStore = {
   fetchTemas: (foroId: string) => Promise<TemasBase>;
   createTema: (foroId: string, payload: TemasBase) => Promise<GlobalResponseSchema>;
   fetchPublicaciones: (foroId: string) => Promise<PublicacionesBase[]>;
-  createPublicacion: (
-    foroId: string,
-    payload: PublicacionesBase
-  ) => Promise<GlobalResponseSchema>;
+  createPublicacion: (foroId: string, payload: PublicacionesBase) => Promise<GlobalResponseSchema>;
   deletePublicacionesDeForo: (foroId: string) => Promise<void>;
   clearError: () => void;
 };
@@ -33,23 +28,19 @@ export const useSocialStore = create<SocialStore>((set, get) => ({
   error: null,
   async fetchForos() {
     set({ isLoading: true, error: null });
-
     try {
-      const data = await apiFetch<ForoBase>("/api/social/foros");
+      const data = await SocialService.obtenerForos();
       set({ foros: data, isLoading: false, error: null });
       return data;
     } catch (error) {
-      const message =
-        error instanceof HttpError ? error.message : "Error al cargar foros";
-      set({ isLoading: false, error: message });
+      set({ isLoading: false, error: String(error) });
       throw error;
     }
   },
   async fetchTemas(foroId) {
     set({ isLoading: true, error: null });
-
     try {
-      const data = await apiFetch<TemasBase>(`/api/social/foros/${foroId}/temas`);
+      const data = await SocialService.obtenerTemasForo(foroId);
       set((state) => ({
         temasByForo: { ...state.temasByForo, [foroId]: data },
         isLoading: false,
@@ -57,104 +48,58 @@ export const useSocialStore = create<SocialStore>((set, get) => ({
       }));
       return data;
     } catch (error) {
-      const message =
-        error instanceof HttpError ? error.message : "Error al cargar temas";
-      set({ isLoading: false, error: message });
+      set({ isLoading: false, error: String(error) });
       throw error;
     }
   },
   async createTema(foroId, payload) {
     set({ isLoading: true, error: null });
-
     try {
-      const response = await apiFetch<GlobalResponseSchema>(
-        `/api/social/foros/${foroId}/temas`,
-        {
-          method: "POST",
-          body: JSON.stringify(payload),
-        }
-      );
-
-      await get().fetchTemas(foroId);
+      const response = await SocialService.registrarTemaForo(foroId, payload);
       set({ isLoading: false, error: null });
       return response;
     } catch (error) {
-      const message =
-        error instanceof HttpError ? error.message : "Error al crear tema";
-      set({ isLoading: false, error: message });
+      set({ isLoading: false, error: String(error) });
       throw error;
     }
   },
   async fetchPublicaciones(foroId) {
     set({ isLoading: true, error: null });
-
     try {
-      const data = await apiFetch<PublicacionesBase[]>(
-        `/api/social/foros/${foroId}/publicaciones`
-      );
+      const data = await SocialService.obtenerPublicacion(foroId);
       set((state) => ({
-        publicacionesByForo: {
-          ...state.publicacionesByForo,
-          [foroId]: data,
-        },
+        publicacionesByForo: { ...state.publicacionesByForo, [foroId]: data },
         isLoading: false,
         error: null,
       }));
       return data;
     } catch (error) {
-      const message =
-        error instanceof HttpError
-          ? error.message
-          : "Error al cargar publicaciones";
-      set({ isLoading: false, error: message });
+      set({ isLoading: false, error: String(error) });
       throw error;
     }
   },
   async createPublicacion(foroId, payload) {
     set({ isLoading: true, error: null });
-
     try {
-      const response = await apiFetch<GlobalResponseSchema>(
-        `/api/social/foros/${foroId}/publicaciones`,
-        {
-          method: "POST",
-          body: JSON.stringify(payload),
-        }
-      );
-
-      await get().fetchPublicaciones(foroId);
+      const response = await SocialService.registrarPublicacion(foroId, payload);
       set({ isLoading: false, error: null });
       return response;
     } catch (error) {
-      const message =
-        error instanceof HttpError
-          ? error.message
-          : "Error al crear publicacion";
-      set({ isLoading: false, error: message });
+      set({ isLoading: false, error: String(error) });
       throw error;
     }
   },
   async deletePublicacionesDeForo(foroId) {
     set({ isLoading: true, error: null });
-
     try {
-      await apiFetch<null>(`/api/social/foros/${foroId}/publicaciones`, {
-        method: "DELETE",
-      });
+      await SocialService.eliminarPublicacion(foroId);
       set((state) => ({
-        publicacionesByForo: {
-          ...state.publicacionesByForo,
-          [foroId]: [],
-        },
+        publicacionesByForo: { ...state.publicacionesByForo, [foroId]: [] },
         isLoading: false,
         error: null,
       }));
     } catch (error) {
-      const message =
-        error instanceof HttpError
-          ? error.message
-          : "Error al eliminar publicaciones";
-      set({ isLoading: false, error: message });
+      set({ isLoading: false, error: String(error) });
       throw error;
     }
   },
@@ -162,4 +107,3 @@ export const useSocialStore = create<SocialStore>((set, get) => ({
     set({ error: null });
   },
 }));
-

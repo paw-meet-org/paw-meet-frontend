@@ -1,6 +1,9 @@
-import type { GlobalResponseSchema, Mascota, MascotasBase } from "@/generated/api";
-import { apiFetch, HttpError } from "@/lib/api/http";
+
 import { create } from "zustand";
+import type { Mascota } from "@/generated/api-client/models/Mascota";
+import type { MascotasBase } from "@/generated/api-client/models/MascotasBase";
+import type { GlobalResponseSchema } from "@/generated/api-client/models/GlobalResponseSchema";
+import { UsuarioService } from "@/generated/api-client/services/UsuarioService";
 
 type MascotasStore = {
   mascotas: Mascota[];
@@ -17,34 +20,24 @@ export const useMascotasStore = create<MascotasStore>((set, get) => ({
   error: null,
   async fetchMascotas() {
     set({ isLoading: true, error: null });
-
     try {
-      const data = await apiFetch<Mascota[]>("/api/user/mascotas");
+      const data = await UsuarioService.getMascotas();
       set({ mascotas: data, isLoading: false, error: null });
       return data;
     } catch (error) {
-      const message =
-        error instanceof HttpError ? error.message : "Error al cargar mascotas";
-      set({ isLoading: false, error: message });
+      set({ isLoading: false, error: String(error) });
       throw error;
     }
   },
   async createMascota(payload) {
     set({ isLoading: true, error: null });
-
     try {
-      const response = await apiFetch<GlobalResponseSchema>("/api/user/mascotas", {
-        method: "POST",
-        body: JSON.stringify(payload),
-      });
-
+      const response = await UsuarioService.registrarMascotas(payload);
       await get().fetchMascotas();
       set({ isLoading: false, error: null });
       return response;
     } catch (error) {
-      const message =
-        error instanceof HttpError ? error.message : "Error al crear mascota";
-      set({ isLoading: false, error: message });
+      set({ isLoading: false, error: String(error) });
       throw error;
     }
   },

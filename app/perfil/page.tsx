@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { FormEvent, useEffect } from "react";
+import { useEffect } from "react";
 import { useAuthStore } from "@/stores";
 
 export default function PerfilPage() {
@@ -30,18 +30,14 @@ export default function PerfilPage() {
     void fetchProfile();
   }, [fetchProfile, hasHydrated, router, token]);
 
-  async function onSubmit(event: FormEvent<HTMLFormElement>) {
+  async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     const formData = new FormData(event.currentTarget);
 
     await updateProfile({
-      username: String(formData.get("username") ?? ""),
-      first_name: String(formData.get("first_name") ?? ""),
-      last_name: String(formData.get("last_name") ?? ""),
-      bio: String(formData.get("bio") ?? ""),
-      ciudad: String(formData.get("ciudad") ?? ""),
-      phone: String(formData.get("phone") ?? ""),
+      nombre: String(formData.get("nombre") ?? ""),
+      biografia: String(formData.get("biografia") ?? ""),
     });
   }
 
@@ -68,7 +64,7 @@ export default function PerfilPage() {
           </button>
         </div>
 
-        <form className="space-y-4" onSubmit={onSubmit} key={user?.id ?? "profile-form"}>
+        <form className="space-y-4" onSubmit={onSubmit} key={user?.username ?? "profile-form"}>
           <label className="block">
             <span className="mb-1 block text-sm font-medium text-blue-800">Email</span>
             <input
@@ -81,58 +77,40 @@ export default function PerfilPage() {
           <label className="block">
             <span className="mb-1 block text-sm font-medium text-blue-800">Usuario</span>
             <input
-              className="w-full rounded-lg border border-blue-200 bg-white px-3 py-2 outline-none focus:border-blue-400"
+              className="w-full rounded-lg border border-blue-200 bg-white px-3 py-2"
               name="username"
               defaultValue={user?.username ?? ""}
+              disabled
             />
           </label>
 
-          <div className="grid gap-4 sm:grid-cols-2">
-            <label className="block">
-              <span className="mb-1 block text-sm font-medium text-blue-800">Nombre</span>
-              <input
-                className="w-full rounded-lg border border-blue-200 bg-white px-3 py-2 outline-none focus:border-blue-400"
-                name="first_name"
-                defaultValue={user?.first_name ?? ""}
-              />
-            </label>
-
-            <label className="block">
-              <span className="mb-1 block text-sm font-medium text-blue-800">Apellidos</span>
-              <input
-                className="w-full rounded-lg border border-blue-200 bg-white px-3 py-2 outline-none focus:border-blue-400"
-                name="last_name"
-                defaultValue={user?.last_name ?? ""}
-              />
-            </label>
-          </div>
+          <label className="block">
+            <span className="mb-1 block text-sm font-medium text-blue-800">Nombre</span>
+            <input
+              className="w-full rounded-lg border border-blue-200 bg-white px-3 py-2 outline-none focus:border-blue-400"
+              name="nombre"
+              defaultValue={user?.username ?? ""} 
+            />
+          </label>
 
           <label className="block">
             <span className="mb-1 block text-sm font-medium text-blue-800">Biografia</span>
             <textarea
               className="w-full rounded-lg border border-blue-200 bg-white px-3 py-2 outline-none focus:border-blue-400"
               rows={4}
-              name="bio"
-              defaultValue={user?.bio ?? ""}
+              name="biografia"
+              defaultValue={user?.biography ?? ""}
             />
           </label>
 
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-4 sm:grid-cols-1">
             <label className="block">
               <span className="mb-1 block text-sm font-medium text-blue-800">Ciudad</span>
               <input
                 className="w-full rounded-lg border border-blue-200 bg-white px-3 py-2 outline-none focus:border-blue-400"
                 name="ciudad"
                 defaultValue={user?.ciudad ?? ""}
-              />
-            </label>
-
-            <label className="block">
-              <span className="mb-1 block text-sm font-medium text-blue-800">Telefono</span>
-              <input
-                className="w-full rounded-lg border border-blue-200 bg-white px-3 py-2 outline-none focus:border-blue-400"
-                name="phone"
-                defaultValue={user?.phone ?? ""}
+                disabled
               />
             </label>
           </div>
@@ -155,4 +133,3 @@ export default function PerfilPage() {
     </div>
   );
 }
-
