@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { ForoDetail } from "@/api";
+import type { ForoDetail } from "@/lib/types/social";
 
 export function ForoSection({ foro }: { foro: ForoDetail }) {
   return (

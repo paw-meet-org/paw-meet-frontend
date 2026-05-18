@@ -11,7 +11,10 @@ const navItems: Array<{ href: string; label: string; isPrivate: boolean; adminOn
   { href: "/auth/mascotas", label: "Mascotas", isPrivate: true },
   { href: "/auth/encuentros", label: "Encuentros", isPrivate: true },
   { href: "/auth/foros", label: "Foros", isPrivate: true },
+  { href: "/auth/publicaciones", label: "Publicaciones", isPrivate: true },
+  { href: "/auth/asistencias", label: "Asistencias", isPrivate: true },
   // Admin only
+  { href: "/auth/admin", label: "Usuarios", isPrivate: true, adminOnly: true },
   { href: "/auth/ciudades", label: "Ciudades", isPrivate: true, adminOnly: true },
   { href: "/auth/categorias", label: "Categorías", isPrivate: true, adminOnly: true },
   { href: "/auth/tipos-mascotas", label: "Tipos Mascotas", isPrivate: true, adminOnly: true },

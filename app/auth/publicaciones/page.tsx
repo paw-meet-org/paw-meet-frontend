@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import Link from "next/link";
+import type { PublicacionList } from "@/api";
 import { useSocialStore } from "@/stores";
 import { PublicacionSection } from "@/components/sections/PublicacionSection";
 
@@ -10,7 +11,7 @@ export default function PublicacionesPage() {
 
   // Todas las publicaciones con su foroId
   const allPublicaciones = foros.flatMap((foro) =>
-    foro.publicaciones.map((pub) => ({ ...pub, foroId: String(foro.id), foroTitulo: foro.titulo }))
+    foro.publicaciones.map((pub: PublicacionList) => ({ ...pub, foroId: String(foro.id), foroTitulo: foro.titulo }))
   );
 
   useEffect(() => {

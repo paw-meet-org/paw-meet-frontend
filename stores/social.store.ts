@@ -1,4 +1,5 @@
-import type { ForoDetail, PublicacionDetail, CategoriaPublicacion } from "@/api";
+import type { PublicacionDetail, CategoriaPublicacion } from "@/api";
+import type { ForoDetail } from "@/lib/types/social";
 import { create } from "zustand";
 
 type PublicacionPayload = {

@@ -101,44 +101,6 @@ export type ClaimAdminResponse = {
 };
 
 /**
- * Serializador detallado de un foro.
- * Incluye la lista de publicaciones que contiene.
- * Se usa para ver un foro concreto y para crearlo.
- */
-export type ForoDetail = {
-    readonly id: number;
-    titulo: string;
-    tipo_foro: string;
-    usuario: UserPublic;
-    readonly publicaciones: Array<PublicacionList>;
-    encuentro?: number | null;
-};
-
-/**
- * Serializador detallado de un foro.
- * Incluye la lista de publicaciones que contiene.
- * Se usa para ver un foro concreto y para crearlo.
- */
-export type ForoDetailRequest = {
-    titulo: string;
-    tipo_foro: string;
-    encuentro?: number | null;
-};
-
-/**
- * Serializador para listar los foros disponibles.
- * Muestra información general y el creador.
- */
-export type ForoList = {
-    readonly id: number;
-    titulo: string;
-    tipo_foro: string;
-    usuario: UserPublic;
-    readonly total_publicaciones: string;
-    encuentro: MeetingDetail;
-};
-
-/**
  * Serializer detallado para encuentros (incluye información de asistentes).
  */
 export type MeetingDetail = {
@@ -315,17 +277,6 @@ export type PatchedCategoriaPublicacionRequest = {
 export type PatchedCityRequest = {
     name?: string;
     province?: string;
-};
-
-/**
- * Serializador detallado de un foro.
- * Incluye la lista de publicaciones que contiene.
- * Se usa para ver un foro concreto y para crearlo.
- */
-export type PatchedForoDetailRequest = {
-    titulo?: string;
-    tipo_foro?: string;
-    encuentro?: number | null;
 };
 
 /**
@@ -695,17 +646,6 @@ export type PublicacionList = {
 };
 
 /**
- * Serializador para listar publicaciones (ej: en el feed o dentro de un foro).
- * Anidamos la categoría para que el frontend no tenga que hacer peticiones extra,
- * y mostramos un resumen del usuario autor.
- */
-export type PublicacionListRequest = {
-    titulo: string;
-    foto?: Blob | File | null;
-    likes?: number;
-};
-
-/**
  * * `user` - Usuario
  * * `admin` - Administrador
  */
@@ -972,26 +912,6 @@ export type CategoriaPublicacionWritable = {
 export type CityWritable = {
     name: string;
     province?: string;
-};
-
-/**
- * Serializador detallado de un foro.
- * Incluye la lista de publicaciones que contiene.
- * Se usa para ver un foro concreto y para crearlo.
- */
-export type ForoDetailWritable = {
-    titulo: string;
-    tipo_foro: string;
-    encuentro?: number | null;
-};
-
-/**
- * Serializador para listar los foros disponibles.
- * Muestra información general y el creador.
- */
-export type ForoListWritable = {
-    titulo: string;
-    tipo_foro: string;
 };
 
 /**
@@ -2225,33 +2145,33 @@ export type SocialPublicacionesUpdateResponses = {
 
 export type SocialPublicacionesUpdateResponse = SocialPublicacionesUpdateResponses[keyof SocialPublicacionesUpdateResponses];
 
-export type SociaslForosListData = {
+export type SociaslForosRetrieveData = {
     body?: never;
     path?: never;
-    query?: {
-        encuentro?: number;
-    };
+    query?: never;
     url: '/api/sociasl/foros/';
 };
 
-export type SociaslForosListResponses = {
-    200: Array<ForoList>;
+export type SociaslForosRetrieveResponses = {
+    /**
+     * No response body
+     */
+    200: unknown;
 };
 
-export type SociaslForosListResponse = SociaslForosListResponses[keyof SociaslForosListResponses];
-
 export type SociaslForosCreateData = {
-    body: ForoDetailRequest;
+    body?: never;
     path?: never;
     query?: never;
     url: '/api/sociasl/foros/';
 };
 
 export type SociaslForosCreateResponses = {
-    201: ForoDetail;
+    /**
+     * No response body
+     */
+    201: unknown;
 };
-
-export type SociaslForosCreateResponse = SociaslForosCreateResponses[keyof SociaslForosCreateResponses];
 
 export type SociaslForosDestroyData = {
     body?: never;
@@ -2274,7 +2194,7 @@ export type SociaslForosDestroyResponses = {
 
 export type SociaslForosDestroyResponse = SociaslForosDestroyResponses[keyof SociaslForosDestroyResponses];
 
-export type SociaslForosRetrieveData = {
+export type SociaslForosRetrieve2Data = {
     body?: never;
     path: {
         /**
@@ -2286,14 +2206,15 @@ export type SociaslForosRetrieveData = {
     url: '/api/sociasl/foros/{id}/';
 };
 
-export type SociaslForosRetrieveResponses = {
-    200: ForoDetail;
+export type SociaslForosRetrieve2Responses = {
+    /**
+     * No response body
+     */
+    200: unknown;
 };
 
-export type SociaslForosRetrieveResponse = SociaslForosRetrieveResponses[keyof SociaslForosRetrieveResponses];
-
 export type SociaslForosPartialUpdateData = {
-    body?: PatchedForoDetailRequest;
+    body?: never;
     path: {
         /**
          * Un valor de entero único que identifique este foro.
@@ -2305,13 +2226,14 @@ export type SociaslForosPartialUpdateData = {
 };
 
 export type SociaslForosPartialUpdateResponses = {
-    200: ForoDetail;
+    /**
+     * No response body
+     */
+    200: unknown;
 };
 
-export type SociaslForosPartialUpdateResponse = SociaslForosPartialUpdateResponses[keyof SociaslForosPartialUpdateResponses];
-
 export type SociaslForosUpdateData = {
-    body: ForoDetailRequest;
+    body?: never;
     path: {
         /**
          * Un valor de entero único que identifique este foro.
@@ -2323,10 +2245,11 @@ export type SociaslForosUpdateData = {
 };
 
 export type SociaslForosUpdateResponses = {
-    200: ForoDetail;
+    /**
+     * No response body
+     */
+    200: unknown;
 };
-
-export type SociaslForosUpdateResponse = SociaslForosUpdateResponses[keyof SociaslForosUpdateResponses];
 
 export type UsersRetrieveData = {
     body?: never;
