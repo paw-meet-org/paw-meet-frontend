@@ -1,18 +1,17 @@
 import { NextResponse } from 'next/server';
-import { ForosService } from '@/api';
-import { createAuthedApiClient, mapApiError, getBackendBaseUrl } from '@/lib/api-client-server';
-import { getAccessToken } from '@/lib/supabase/server';
+import { ForosService, PublicacionesService } from '@/api';
+import { createAuthedApiClient, mapApiError } from '@/lib/api-client-server';
+import type { Client } from '@/api/client';
 
-// Obtiene publicaciones de un foro usando el query param soportado por el backend
-async function fetchPublicacionesByForo(foroId: number, token: string | null) {
+// El schema OpenAPI no documenta ?foro_id= en publicaciones pero el backend lo soporta.
+// Usamos el cliente SDK para mantener la autenticación centralizada.
+async function fetchPublicacionesByForo(foroId: number, client: Client) {
   try {
-    const url = `${getBackendBaseUrl()}/api/social/publicaciones/?foro_id=${foroId}`;
-    const res = await fetch(url, {
-      headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) },
-    });
-    if (!res.ok) return [];
-    const data = await res.json() as unknown;
-    return Array.isArray(data) ? data : ((data as Record<string, unknown>).results ?? []);
+    // @ts-expect-error — foro_id no está en los tipos generados pero el backend lo acepta
+    const result = await PublicacionesService.socialPublicacionesList({ client, query: { foro_id: foroId } });
+    if (result.error) return [];
+    const data = result.data;
+    return Array.isArray(data) ? data : [];
   } catch {
     return [];
   }
@@ -21,9 +20,8 @@ async function fetchPublicacionesByForo(foroId: number, token: string | null) {
 // GET /api/foros -> lista foros
 export async function GET() {
   try {
-    const token = await getAccessToken();
     const client = await createAuthedApiClient();
-    const result = await ForosService.sociaslForosList({ client });
+    const result = await ForosService.sociaslForosRetrieve({ client });
 
     if (result.error) {
       return NextResponse.json({ message: 'API error', details: result.error }, { status: result.response?.status ?? 502 });
@@ -34,10 +32,16 @@ export async function GET() {
       return NextResponse.json(foros, { status: 200 });
     }
 
-    // Enriquecer cada foro con sus publicaciones via ?foro_id= (el retrieve devuelve 403)
+    // Camino principal: detalle por id (backend debería incluir publicaciones).
+    // Fallback: usar ?foro_id= mientras el retrieve falle en backend.
     const enrichedForos = await Promise.all(
       foros.map(async (foro) => {
-        const publicaciones = await fetchPublicacionesByForo(foro.id, token);
+        const detailResult = await ForosService.sociaslForosRetrieve2({ client, path: { id: foro.id } });
+        if (!detailResult.error && detailResult.data) {
+          return detailResult.data;
+        }
+
+        const publicaciones = await fetchPublicacionesByForo(foro.id, client);
         return { ...foro, publicaciones };
       })
     );

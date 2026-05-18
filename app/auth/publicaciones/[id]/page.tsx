@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect } from "react";
+import type { PublicacionList } from "@/api";
 import { useSocialStore } from "@/stores";
 
 /**
@@ -22,7 +23,7 @@ export default function PublicacionPage() {
   // Buscar la publicación en todos los foros para obtener el foroId
   let foroId: string | null = null;
   for (const foro of foros) {
-    if (foro.publicaciones.some((p) => String(p.id) === id)) {
+    if (foro.publicaciones.some((p: PublicacionList) => String(p.id) === id)) {
       foroId = String(foro.id);
       break;
     }

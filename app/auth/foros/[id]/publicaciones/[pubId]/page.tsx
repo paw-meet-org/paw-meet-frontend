@@ -20,7 +20,7 @@ export default function PublicacionDetailPage() {
   const [isEditing, setIsEditing] = useState(false);
 
   const foro = foros.find((f) => String(f.id) === foroId);
-  const publicacion = foro?.publicaciones.find((p) => String(p.id) === pubId) as PublicacionList | undefined;
+  const publicacion = foro?.publicaciones.find((p: PublicacionList) => String(p.id) === pubId) as PublicacionList | undefined;
   const isOwner = publicacion && "usuario_detail" in publicacion
     ? String((publicacion.usuario_detail as unknown as { id?: string })?.id ?? "") === String(user?.id ?? "")
     : false;

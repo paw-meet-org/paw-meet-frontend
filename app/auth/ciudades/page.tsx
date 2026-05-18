@@ -3,43 +3,8 @@
 import { useEffect } from "react";
 import Link from "next/link";
 import { useAdminStore } from "@/stores";
-import type { City } from "@/api";
 import { useUserRole } from "@/lib/use-user-role";
-
-function CiudadSection({ ciudad }: { ciudad: City }) {
-  return (
-    <div className="group relative overflow-hidden rounded-3xl bg-white p-6 shadow-sm border border-slate-100 transition-all hover:-translate-y-1 hover:shadow-xl">
-      <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-blue-500/10 blur-2xl transition-transform group-hover:scale-150"></div>
-      
-      <div className="relative z-10 flex items-start justify-between">
-        <div className="flex items-center gap-4">
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-100 text-2xl shadow-inner">
-            🏙️
-          </div>
-          <div>
-            <h3 className="text-xl font-bold text-slate-800 line-clamp-1">{ciudad.name}</h3>
-            <span className="inline-block rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600 mt-1">
-              Ciudad #{ciudad.id}
-            </span>
-          </div>
-        </div>
-      </div>
-      
-      <div className="relative z-10 mt-6 flex items-center justify-between border-t border-slate-100 pt-4">
-        <Link
-          href={`/auth/ciudades/${ciudad.id}`}
-          className="flex items-center gap-2 text-sm font-bold text-blue-600 transition-colors hover:text-blue-700"
-        >
-          Administrar
-          <svg className="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-          </svg>
-        </Link>
-      </div>
-    </div>
-  );
-}
+import { CiudadSection } from "@/components/sections/CiudadSection";
 
 export default function CiudadesPage() {
   const { ciudades, isLoading, error, fetchCiudades, clearError } = useAdminStore();

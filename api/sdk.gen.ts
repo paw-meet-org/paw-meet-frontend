@@ -2,7 +2,7 @@
 
 import type { Client, Options as Options2, TDataShape } from './client';
 import { client } from './client.gen';
-import type { AdminCreateCreateData, AdminCreateCreateResponses, AdminEncuentrosListListData, AdminEncuentrosListListResponses, AdminLoginCreateData, AdminLoginCreateErrors, AdminLoginCreateResponses, AdminSocialPublicacionesListListData, AdminSocialPublicacionesListListResponses, AdminUsersDeleteDestroyData, AdminUsersDeleteDestroyResponses, AdminUsersListListData, AdminUsersListListResponses, AttendancesDestroyData, AttendancesDestroyResponses, AttendancesListData, AttendancesListResponses, AttendancesPartialUpdateData, AttendancesPartialUpdateResponses, AttendancesRetrieveData, AttendancesRetrieveResponses, AttendancesUpdateData, AttendancesUpdateResponses, CitiesCreateData, CitiesCreateResponses, CitiesDestroyData, CitiesDestroyResponses, CitiesListData, CitiesListResponses, CitiesPartialUpdateData, CitiesPartialUpdateResponses, CitiesRetrieveData, CitiesRetrieveResponses, CitiesUpdateData, CitiesUpdateResponses, MeetingsAttendeesRetrieveData, MeetingsAttendeesRetrieveResponses, MeetingsCancelCreateData, MeetingsCancelCreateResponses, MeetingsCreateData, MeetingsCreateResponses, MeetingsDestroyData, MeetingsDestroyResponses, MeetingsJoinCreateData, MeetingsJoinCreateResponses, MeetingsLeaveCreateData, MeetingsLeaveCreateResponses, MeetingsListData, MeetingsListResponses, MeetingsMyMeetingsRetrieveData, MeetingsMyMeetingsRetrieveResponses, MeetingsNearbyRetrieveData, MeetingsNearbyRetrieveResponses, MeetingsPartialUpdateData, MeetingsPartialUpdateResponses, MeetingsRetrieveData, MeetingsRetrieveResponses, MeetingsUpdateData, MeetingsUpdateResponses, PettypesCreateData, PettypesCreateResponses, PettypesDestroyData, PettypesDestroyResponses, PettypesListData, PettypesListResponses, PettypesPartialUpdateData, PettypesPartialUpdateResponses, PettypesRetrieveData, PettypesRetrieveResponses, PettypesUpdateData, PettypesUpdateResponses, SchemaRetrieveData, SchemaRetrieveResponses, SocialCategoriasCreateData, SocialCategoriasCreateResponses, SocialCategoriasDestroyData, SocialCategoriasDestroyResponses, SocialCategoriasListData, SocialCategoriasListResponses, SocialCategoriasPartialUpdateData, SocialCategoriasPartialUpdateResponses, SocialCategoriasRetrieveData, SocialCategoriasRetrieveResponses, SocialCategoriasUpdateData, SocialCategoriasUpdateResponses, SocialPublicacionesCreateData, SocialPublicacionesCreateResponses, SocialPublicacionesDestroyData, SocialPublicacionesDestroyResponses, SocialPublicacionesListData, SocialPublicacionesListResponses, SocialPublicacionesPartialUpdateData, SocialPublicacionesPartialUpdateResponses, SocialPublicacionesRetrieveData, SocialPublicacionesRetrieveResponses, SocialPublicacionesUpdateData, SocialPublicacionesUpdateResponses, SociaslForosCreateData, SociaslForosCreateResponses, SociaslForosDestroyData, SociaslForosDestroyResponses, SociaslForosListData, SociaslForosListResponses, SociaslForosPartialUpdateData, SociaslForosPartialUpdateResponses, SociaslForosRetrieveData, SociaslForosRetrieveResponses, SociaslForosUpdateData, SociaslForosUpdateResponses, UsersMeChangePasswordCreateData, UsersMeChangePasswordCreateResponses, UsersMePartialUpdateData, UsersMePartialUpdateResponses, UsersMePetsCreateData, UsersMePetsCreateResponses, UsersMePetsDestroyData, UsersMePetsDestroyResponses, UsersMePetsListData, UsersMePetsListResponses, UsersMePetsPartialUpdateData, UsersMePetsPartialUpdateResponses, UsersMePetsRestoreCreateData, UsersMePetsRestoreCreateResponses, UsersMePetsRetrieveData, UsersMePetsRetrieveResponses, UsersMePetsUpdateData, UsersMePetsUpdateResponses, UsersMeRetrieveData, UsersMeRetrieveResponses, UsersMeUpdateData, UsersMeUpdateResponses, UsersRetrieveData, UsersRetrieveResponses } from './types.gen';
+import type { AdminCreateCreateData, AdminCreateCreateResponses, AdminEncuentrosListListData, AdminEncuentrosListListResponses, AdminLoginCreateData, AdminLoginCreateErrors, AdminLoginCreateResponses, AdminSocialPublicacionesListListData, AdminSocialPublicacionesListListResponses, AdminUsersDeleteDestroyData, AdminUsersDeleteDestroyResponses, AdminUsersListListData, AdminUsersListListResponses, AttendancesDestroyData, AttendancesDestroyResponses, AttendancesListData, AttendancesListResponses, AttendancesPartialUpdateData, AttendancesPartialUpdateResponses, AttendancesRetrieveData, AttendancesRetrieveResponses, AttendancesUpdateData, AttendancesUpdateResponses, CitiesCreateData, CitiesCreateResponses, CitiesDestroyData, CitiesDestroyResponses, CitiesListData, CitiesListResponses, CitiesPartialUpdateData, CitiesPartialUpdateResponses, CitiesRetrieveData, CitiesRetrieveResponses, CitiesUpdateData, CitiesUpdateResponses, MeetingsAttendeesRetrieveData, MeetingsAttendeesRetrieveResponses, MeetingsCancelCreateData, MeetingsCancelCreateResponses, MeetingsCreateData, MeetingsCreateResponses, MeetingsDestroyData, MeetingsDestroyResponses, MeetingsJoinCreateData, MeetingsJoinCreateResponses, MeetingsLeaveCreateData, MeetingsLeaveCreateResponses, MeetingsListData, MeetingsListResponses, MeetingsMyMeetingsRetrieveData, MeetingsMyMeetingsRetrieveResponses, MeetingsNearbyRetrieveData, MeetingsNearbyRetrieveResponses, MeetingsPartialUpdateData, MeetingsPartialUpdateResponses, MeetingsRetrieveData, MeetingsRetrieveResponses, MeetingsUpdateData, MeetingsUpdateResponses, PettypesCreateData, PettypesCreateResponses, PettypesDestroyData, PettypesDestroyResponses, PettypesListData, PettypesListResponses, PettypesPartialUpdateData, PettypesPartialUpdateResponses, PettypesRetrieveData, PettypesRetrieveResponses, PettypesUpdateData, PettypesUpdateResponses, SchemaRetrieveData, SchemaRetrieveResponses, SocialCategoriasCreateData, SocialCategoriasCreateResponses, SocialCategoriasDestroyData, SocialCategoriasDestroyResponses, SocialCategoriasListData, SocialCategoriasListResponses, SocialCategoriasPartialUpdateData, SocialCategoriasPartialUpdateResponses, SocialCategoriasRetrieveData, SocialCategoriasRetrieveResponses, SocialCategoriasUpdateData, SocialCategoriasUpdateResponses, SocialPublicacionesCreateData, SocialPublicacionesCreateResponses, SocialPublicacionesDestroyData, SocialPublicacionesDestroyResponses, SocialPublicacionesListData, SocialPublicacionesListResponses, SocialPublicacionesPartialUpdateData, SocialPublicacionesPartialUpdateResponses, SocialPublicacionesRetrieveData, SocialPublicacionesRetrieveResponses, SocialPublicacionesUpdateData, SocialPublicacionesUpdateResponses, SociaslForosCreateData, SociaslForosCreateResponses, SociaslForosDestroyData, SociaslForosDestroyResponses, SociaslForosPartialUpdateData, SociaslForosPartialUpdateResponses, SociaslForosRetrieve2Data, SociaslForosRetrieve2Responses, SociaslForosRetrieveData, SociaslForosRetrieveResponses, SociaslForosUpdateData, SociaslForosUpdateResponses, UsersMeChangePasswordCreateData, UsersMeChangePasswordCreateResponses, UsersMePartialUpdateData, UsersMePartialUpdateResponses, UsersMePetsCreateData, UsersMePetsCreateResponses, UsersMePetsDestroyData, UsersMePetsDestroyResponses, UsersMePetsListData, UsersMePetsListResponses, UsersMePetsPartialUpdateData, UsersMePetsPartialUpdateResponses, UsersMePetsRestoreCreateData, UsersMePetsRestoreCreateResponses, UsersMePetsRetrieveData, UsersMePetsRetrieveResponses, UsersMePetsUpdateData, UsersMePetsUpdateResponses, UsersMeRetrieveData, UsersMeRetrieveResponses, UsersMeUpdateData, UsersMeUpdateResponses, UsersRetrieveData, UsersRetrieveResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -85,6 +85,14 @@ export class AdminService {
     
     /**
      * Elimina un usuario por email
+     *
+     * Mixin para vistas que llaman a servicios externos (Supabase, etc.).
+     * Envuelve la llamada y convierte fallos de red en errores controlados.
+     *
+     * Uso:
+     * class MiVista(ExternalServiceMixin, generics.CreateAPIView):
+     * ...
+     * response = self.call_external(requests.post, url=url, headers=headers, json=payload)
      */
     public static adminUsersDeleteDestroy<ThrowOnError extends boolean = false>(options: Options<AdminUsersDeleteDestroyData, ThrowOnError>) {
         return (options.client ?? client).delete<AdminUsersDeleteDestroyResponses, unknown, ThrowOnError>({
@@ -718,9 +726,7 @@ export class CategoriasPublicacionService {
     }
     
     /**
-     * ViewSet para Categorías de Publicación.
-     * - GET: Disponible para cualquier usuario autenticado (para rellenar desplegables al crear posts).
-     * - POST/PATCH/DELETE: Solo para Administradores de la app.
+     * Eliminar categoría con validación de que no tenga publicaciones asociadas.
      */
     public static socialCategoriasDestroy<ThrowOnError extends boolean = false>(options: Options<SocialCategoriasDestroyData, ThrowOnError>) {
         return (options.client ?? client).delete<SocialCategoriasDestroyResponses, unknown, ThrowOnError>({
@@ -813,9 +819,7 @@ export class PublicacionesService {
     }
     
     /**
-     * ViewSet completo para Publicaciones.
-     * - Todos los usuarios autenticados pueden ver publicaciones y crearlas.
-     * - Solo el autor original (owner) o un admin pueden editar o eliminarlas.
+     * Crear una nueva publicación con validaciones adicionales.
      */
     public static socialPublicacionesCreate<ThrowOnError extends boolean = false>(options: Options<SocialPublicacionesCreateData, ThrowOnError>) {
         return (options.client ?? client).post<SocialPublicacionesCreateResponses, unknown, ThrowOnError>({
@@ -916,8 +920,8 @@ export class ForosService {
      * - Todos los usuarios autenticados pueden ver foros y crearlos.
      * - Solo el creador original (owner) o un admin pueden editar o eliminar un foro.
      */
-    public static sociaslForosList<ThrowOnError extends boolean = false>(options?: Options<SociaslForosListData, ThrowOnError>) {
-        return (options?.client ?? client).get<SociaslForosListResponses, unknown, ThrowOnError>({
+    public static sociaslForosRetrieve<ThrowOnError extends boolean = false>(options?: Options<SociaslForosRetrieveData, ThrowOnError>) {
+        return (options?.client ?? client).get<SociaslForosRetrieveResponses, unknown, ThrowOnError>({
             security: [{ scheme: 'bearer', type: 'http' }, {
                     in: 'cookie',
                     name: 'sessionid',
@@ -933,19 +937,15 @@ export class ForosService {
      * - Todos los usuarios autenticados pueden ver foros y crearlos.
      * - Solo el creador original (owner) o un admin pueden editar o eliminar un foro.
      */
-    public static sociaslForosCreate<ThrowOnError extends boolean = false>(options: Options<SociaslForosCreateData, ThrowOnError>) {
-        return (options.client ?? client).post<SociaslForosCreateResponses, unknown, ThrowOnError>({
+    public static sociaslForosCreate<ThrowOnError extends boolean = false>(options?: Options<SociaslForosCreateData, ThrowOnError>) {
+        return (options?.client ?? client).post<SociaslForosCreateResponses, unknown, ThrowOnError>({
             security: [{ scheme: 'bearer', type: 'http' }, {
                     in: 'cookie',
                     name: 'sessionid',
                     type: 'apiKey'
                 }],
             url: '/api/sociasl/foros/',
-            ...options,
-            headers: {
-                'Content-Type': 'application/json',
-                ...options.headers
-            }
+            ...options
         });
     }
     
@@ -971,8 +971,8 @@ export class ForosService {
      * - Todos los usuarios autenticados pueden ver foros y crearlos.
      * - Solo el creador original (owner) o un admin pueden editar o eliminar un foro.
      */
-    public static sociaslForosRetrieve<ThrowOnError extends boolean = false>(options: Options<SociaslForosRetrieveData, ThrowOnError>) {
-        return (options.client ?? client).get<SociaslForosRetrieveResponses, unknown, ThrowOnError>({
+    public static sociaslForosRetrieve2<ThrowOnError extends boolean = false>(options: Options<SociaslForosRetrieve2Data, ThrowOnError>) {
+        return (options.client ?? client).get<SociaslForosRetrieve2Responses, unknown, ThrowOnError>({
             security: [{ scheme: 'bearer', type: 'http' }, {
                     in: 'cookie',
                     name: 'sessionid',
@@ -996,11 +996,7 @@ export class ForosService {
                     type: 'apiKey'
                 }],
             url: '/api/sociasl/foros/{id}/',
-            ...options,
-            headers: {
-                'Content-Type': 'application/json',
-                ...options.headers
-            }
+            ...options
         });
     }
     
@@ -1017,11 +1013,7 @@ export class ForosService {
                     type: 'apiKey'
                 }],
             url: '/api/sociasl/foros/{id}/',
-            ...options,
-            headers: {
-                'Content-Type': 'application/json',
-                ...options.headers
-            }
+            ...options
         });
     }
 }

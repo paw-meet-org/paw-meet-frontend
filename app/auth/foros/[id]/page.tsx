@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import type { PublicacionList } from "@/api";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { useSocialStore } from "@/stores";
 import { useCurrentUser } from "@/lib/use-current-user";
@@ -228,7 +229,7 @@ export default function ForoDetailPage() {
             </div>
           ) : (
             <div className="grid gap-6">
-              {(foro.publicaciones ?? []).map((pub) => (
+              {(foro.publicaciones ?? []).map((pub: PublicacionList) => (
                 <div key={pub.id} className="group relative overflow-hidden rounded-3xl bg-white p-6 shadow-sm border border-slate-100 transition-all hover:-translate-y-1 hover:shadow-xl">
                   <div className="absolute -left-10 -top-10 h-32 w-32 rounded-full bg-orange-500/5 blur-2xl transition-transform group-hover:scale-150"></div>
                   <PublicacionSection publicacion={pub} foroId={foroId} />

@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
-import { ForosService } from '@/api';
-import { createAuthedApiClient, mapApiError, getBackendBaseUrl } from '@/lib/api-client-server';
-import { getAccessToken } from '@/lib/supabase/server';
+import { ForosService, PublicacionesService } from '@/api';
+import { createAuthedApiClient, mapApiError } from '@/lib/api-client-server';
 
 export async function GET(
   request: Request,
@@ -10,12 +9,17 @@ export async function GET(
   try {
     const { id } = await params;
     const foroId = Number(id);
-    const token = await getAccessToken();
     const client = await createAuthedApiClient();
 
-    // El endpoint de detalle GET /api/sociasl/foros/{id}/ devuelve 403 para todos los usuarios.
-    // Workaround: obtener la lista de foros y filtrar por id, luego pedir publicaciones con ?foro_id=
-    const listResult = await ForosService.sociaslForosList({ client });
+    // Camino principal: el backend debería devolver publicaciones en el detalle.
+    const detailResult = await ForosService.sociaslForosRetrieve2({ client, path: { id: foroId } });
+    if (!detailResult.error && detailResult.data) {
+      return NextResponse.json(detailResult.data, { status: 200 });
+    }
+
+    // Fallback temporal: el backend todavía puede responder 500 en /foros/{id}/.
+    // En ese caso, reconstruimos el detalle desde la lista + filtro por foro_id.
+    const listResult = await ForosService.sociaslForosRetrieve({ client });
     if (listResult.error) {
       return NextResponse.json(
         { message: 'API error', details: listResult.error, backendStatus: listResult.response?.status ?? 502 },
@@ -30,18 +34,9 @@ export async function GET(
       return NextResponse.json({ message: 'Foro no encontrado', backendStatus: 404 }, { status: 404 });
     }
 
-    // Obtener publicaciones del foro con el query param soportado
-    let publicaciones: unknown[] = [];
-    try {
-      const url = `${getBackendBaseUrl()}/api/social/publicaciones/?foro_id=${foroId}`;
-      const res = await fetch(url, {
-        headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) },
-      });
-      if (res.ok) {
-        const data = await res.json() as unknown;
-        publicaciones = Array.isArray(data) ? data : ((data as Record<string, unknown>).results as unknown[] ?? []);
-      }
-    } catch { /* si falla, devolver publicaciones vacías */ }
+    // @ts-expect-error — foro_id no está en los tipos generados pero el backend lo acepta
+    const pubsResult = await PublicacionesService.socialPublicacionesList({ client, query: { foro_id: foroId } });
+    const publicaciones = !pubsResult.error && Array.isArray(pubsResult.data) ? pubsResult.data : [];
 
     return NextResponse.json({ ...foro, publicaciones }, { status: 200 });
   } catch (error) {
