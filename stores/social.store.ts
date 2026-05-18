@@ -11,10 +11,10 @@ type PublicacionPayload = {
 type SocialStore = {
   foros: ForoDetail[];
   categorias: CategoriaPublicacion[];
-  publicacionesByForo: Record<string, PublicacionDetail[]>;
   isLoading: boolean;
   error: string | null;
   fetchForos: () => Promise<ForoDetail[]>;
+  fetchForo: (id: string) => Promise<ForoDetail>;
   createForo: (payload: unknown) => Promise<ForoDetail>;
   updateForo: (id: string, payload: unknown) => Promise<ForoDetail>;
   deleteForo: (id: string) => Promise<void>;
@@ -22,17 +22,15 @@ type SocialStore = {
   createCategoria: (payload: unknown) => Promise<CategoriaPublicacion>;
   updateCategoria: (id: string, payload: unknown) => Promise<CategoriaPublicacion>;
   deleteCategoria: (id: string) => Promise<void>;
-  fetchPublicaciones: (foroId: string) => Promise<PublicacionDetail[]>;
   createPublicacion: (payload: unknown) => Promise<PublicacionDetail>;
   updatePublicacion: (id: string, payload: unknown) => Promise<PublicacionDetail>;
   deletePublicacion: (id: string) => Promise<void>;
   clearError: () => void;
 };
 
-export const useSocialStore = create<SocialStore>((set) => ({
+export const useSocialStore = create<SocialStore>((set, get) => ({
   foros: [],
   categorias: [],
-  publicacionesByForo: {},
   isLoading: false,
   error: null,
   async fetchForos() {
@@ -47,6 +45,29 @@ export const useSocialStore = create<SocialStore>((set) => ({
       return data;
     } catch (error) {
       set({ isLoading: false, error: String(error) });
+      throw error;
+    }
+  },
+  async fetchForo(id) {
+    try {
+      const response = await fetch(`/api/foros/${id}`);
+      if (!response.ok) {
+        let detail = `status ${response.status}`;
+        try {
+          const body = await response.json() as Record<string, unknown>;
+          const backendStatus = body.backendStatus ?? response.status;
+          detail = `backend status ${String(backendStatus)}: ${JSON.stringify(body.details ?? body.message ?? "")}`;
+        } catch { /* ignore */ }
+        throw new Error(`fetchForo(${id}) failed - ${detail}`);
+      }
+      const data = (await response.json()) as ForoDetail;
+      set((state) => ({
+        foros: state.foros.some((f) => String(f.id) === id)
+          ? state.foros.map((f) => (String(f.id) === id ? data : f))
+          : [...state.foros, data],
+      }));
+      return data;
+    } catch (error) {
       throw error;
     }
   },
@@ -126,6 +147,7 @@ export const useSocialStore = create<SocialStore>((set) => ({
       throw error;
     }
   },
+
   async createCategoria(payload) {
     set({ isLoading: true, error: null });
     try {
@@ -145,6 +167,7 @@ export const useSocialStore = create<SocialStore>((set) => ({
       throw error;
     }
   },
+
   async updateCategoria(id, payload) {
     set({ isLoading: true, error: null });
     try {
@@ -168,6 +191,7 @@ export const useSocialStore = create<SocialStore>((set) => ({
       throw error;
     }
   },
+
   async deleteCategoria(id) {
     set({ isLoading: true, error: null });
     try {
@@ -187,25 +211,7 @@ export const useSocialStore = create<SocialStore>((set) => ({
       throw error;
     }
   },
-  async fetchPublicaciones(foroId) {
-    set({ isLoading: true, error: null });
-    try {
-      const response = await fetch("/api/publicaciones");
-      if (!response.ok) {
-        throw new Error(`Failed to fetch publicaciones: ${response.statusText}`);
-      }
-      const data = (await response.json()) as PublicacionDetail[];
-      set((state) => ({
-        publicacionesByForo: { ...state.publicacionesByForo, [foroId]: data },
-        isLoading: false,
-        error: null,
-      }));
-      return data;
-    } catch (error) {
-      set({ isLoading: false, error: String(error) });
-      throw error;
-    }
-  },
+
   async createPublicacion(payload) {
     set({ isLoading: true, error: null });
     try {
@@ -215,27 +221,51 @@ export const useSocialStore = create<SocialStore>((set) => ({
         body: JSON.stringify(payload),
       });
       if (!response.ok) {
-        throw new Error(`Failed to create publicacion: ${response.statusText}`);
+        let detail = response.statusText;
+        try {
+          const body = await response.json() as Record<string, unknown>;
+          detail = JSON.stringify(body.details ?? body.message ?? body);
+        } catch { /* ignore */ }
+        throw new Error(`Failed to create publicacion: ${detail}`);
       }
       const data = (await response.json()) as PublicacionDetail;
-      
-      // Actualizar el foro local con la nueva publicación
-      const foroId = (payload as unknown as PublicacionPayload).foro_id;
-      set((state) => ({
-        foros: state.foros.map((f) =>
-          String(f.id) === String(foroId)
-            ? { ...f, publicaciones: [...(f.publicaciones ?? []), data as never] }
-            : f
-        ),
-        isLoading: false,
-        error: null,
-      }));
+      // Intentar refrescar el foro para sincronizar publicaciones desde el backend.
+      // Si falla, añadir la publicación optimistamente al foro en memoria.
+      const foroId = String((payload as PublicacionPayload).foro_id);
+      try {
+        await get().fetchForo(foroId);
+      } catch {
+        // Fallback optimista: añadir la nueva pub al foro en memoria con forma compatible
+        set((state) => ({
+          foros: state.foros.map((f) =>
+            String(f.id) === foroId
+              ? {
+                  ...f,
+                  publicaciones: [
+                    ...(f.publicaciones ?? []),
+                    {
+                      id: data.id,
+                      titulo: data.titulo,
+                      usuario: data.usuario_detail,
+                      categoria: data.categoria_detail,
+                      foto: data.foto,
+                      uploaded_at: data.uploaded_at,
+                      likes: data.likes,
+                    } as never,
+                  ],
+                }
+              : f
+          ),
+        }));
+      }
+      set({ isLoading: false, error: null });
       return data;
     } catch (error) {
       set({ isLoading: false, error: String(error) });
       throw error;
     }
   },
+
   async updatePublicacion(id, payload) {
     set({ isLoading: true, error: null });
     try {
@@ -248,29 +278,23 @@ export const useSocialStore = create<SocialStore>((set) => ({
         throw new Error(`Failed to update publicacion: ${response.statusText}`);
       }
       const data = (await response.json()) as PublicacionDetail;
-      
-      // Actualizar la publicación en el foro local
-      const foroId = (payload as unknown as PublicacionPayload).foro_id;
-      set((state) => ({
-        foros: state.foros.map((f) =>
-          String(f.id) === String(foroId)
-            ? {
-                ...f,
-                publicaciones: (f.publicaciones ?? []).map((p) =>
-                  String(p.id) === id ? (data as never) : p
-                ),
-              }
-            : f
-        ),
-        isLoading: false,
-        error: null,
-      }));
+      // Refrescar el foro concreto (best-effort, no bloquea si falla)
+      const foroId = String((payload as PublicacionPayload).foro_id);
+      if (foroId) {
+        try {
+          await get().fetchForo(foroId);
+        } catch {
+          // Ignorar si el refresco falla
+        }
+      }
+      set({ isLoading: false, error: null });
       return data;
     } catch (error) {
       set({ isLoading: false, error: String(error) });
       throw error;
     }
   },
+
   async deletePublicacion(id) {
     set({ isLoading: true, error: null });
     try {
@@ -280,8 +304,7 @@ export const useSocialStore = create<SocialStore>((set) => ({
       if (!response.ok) {
         throw new Error(`Failed to delete publicacion: ${response.statusText}`);
       }
-      
-      // Eliminar la publicación de todos los foros
+      // Eliminar de todos los foros en memoria
       set((state) => ({
         foros: state.foros.map((f) => ({
           ...f,
@@ -295,6 +318,7 @@ export const useSocialStore = create<SocialStore>((set) => ({
       throw error;
     }
   },
+
   clearError() {
     set({ error: null });
   },

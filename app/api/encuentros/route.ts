@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { MeetingsService } from '@/api';
-import { createAuthedApiClient, mapApiError } from '@/lib/api-client-server';
+import { createAuthedApiClient, getBackendBaseUrl, mapApiError } from '@/lib/api-client-server';
+import { getAccessToken } from '@/lib/supabase/server';
 
 // GET /api/encuentros -> lista encuentros
 export async function GET() {
@@ -45,15 +46,39 @@ export async function GET() {
 // POST /api/encuentros -> crear encuentro
 export async function POST(request: Request) {
   try {
-    const payload = await request.json();
-    const client = await createAuthedApiClient();
-    const result = await MeetingsService.meetingsCreate({ client, body: payload });
+    const payload = (await request.json()) as Record<string, unknown>;
+    const token = await getAccessToken();
 
-    if (result.error) {
-      return NextResponse.json({ message: 'API error', details: result.error }, { status: result.response?.status ?? 502 });
+    // Some backend deployments parse this endpoint only as form-data.
+    const body = new FormData();
+    Object.entries(payload).forEach(([key, value]) => {
+      if (value === undefined || value === null) return;
+      if (Array.isArray(value)) {
+        value.forEach((item) => body.append(key, String(item)));
+        return;
+      }
+      body.append(key, String(value));
+    });
+
+    const backendResponse = await fetch(`${getBackendBaseUrl()}/api/meetings/`, {
+      method: 'POST',
+      headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+      body,
+    });
+
+    const contentType = backendResponse.headers.get('content-type') ?? '';
+    const responseData = contentType.includes('application/json')
+      ? await backendResponse.json()
+      : { raw: await backendResponse.text() };
+
+    if (!backendResponse.ok) {
+      return NextResponse.json(
+        { message: 'API error', details: responseData },
+        { status: backendResponse.status || 502 }
+      );
     }
 
-    return NextResponse.json(result.data, { status: 201 });
+    return NextResponse.json(responseData, { status: 201 });
   } catch (error) {
     return mapApiError(error, 400);
   }

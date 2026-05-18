@@ -14,7 +14,7 @@ export default function EncuentrosPage() {
 
   return (
     <div className="min-h-screen bg-slate-50 px-6 py-12">
-      <main className="mx-auto w-full max-w-5xl">
+      <main className="mx-auto w-full max-w-6xl">
         <div className="mb-10 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-4xl font-extrabold tracking-tight text-slate-900">Encuentros</h1>
@@ -65,10 +65,13 @@ export default function EncuentrosPage() {
             </Link>
           </div>
         ) : (
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-6 md:grid-cols-2">
             {encuentros.map((encuentro) => (
-              <div key={encuentro.id} className="group relative overflow-hidden rounded-3xl bg-white p-6 shadow-sm border border-slate-100 transition-all hover:-translate-y-1 hover:shadow-xl">
-                <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-green-500/10 blur-2xl transition-transform group-hover:scale-150"></div>
+              <div
+                key={encuentro.id}
+                className="group relative flex h-full flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 transition-all hover:-translate-y-0.5 hover:border-green-200"
+              >
+                <div className="absolute -right-14 -top-14 h-36 w-36 rounded-full bg-green-500/10 blur-2xl transition-transform group-hover:scale-110"></div>
                 <EncuentroSection encuentro={encuentro} />
               </div>
             ))}

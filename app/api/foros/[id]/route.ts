@@ -12,7 +12,12 @@ export async function GET(
     const result = await ForosService.sociaslForosRetrieve({ client, path: { id: Number(id) } });
 
     if (result.error) {
-      return NextResponse.json({ message: 'API error', details: result.error }, { status: result.response?.status ?? 502 });
+      const status = result.response?.status ?? 502;
+      // Si el backend devuelve 404, devolver 404 para que el cliente lo detecte correctamente
+      return NextResponse.json(
+        { message: 'API error', details: result.error, backendStatus: status },
+        { status }
+      );
     }
 
     return NextResponse.json(result.data, { status: 200 });

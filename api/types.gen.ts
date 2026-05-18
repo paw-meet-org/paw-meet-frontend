@@ -135,7 +135,7 @@ export type ForoList = {
     tipo_foro: string;
     usuario: UserPublic;
     readonly total_publicaciones: string;
-    encuentro?: number | null;
+    encuentro: MeetingDetail;
 };
 
 /**
@@ -992,7 +992,6 @@ export type ForoDetailWritable = {
 export type ForoListWritable = {
     titulo: string;
     tipo_foro: string;
-    encuentro?: number | null;
 };
 
 /**
@@ -2229,7 +2228,9 @@ export type SocialPublicacionesUpdateResponse = SocialPublicacionesUpdateRespons
 export type SociaslForosListData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        encuentro?: number;
+    };
     url: '/api/sociasl/foros/';
 };
 
