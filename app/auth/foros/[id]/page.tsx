@@ -13,20 +13,41 @@ export default function ForoDetailPage() {
   const params = useParams();
   const foroId = params?.id as string;
 
-  const { foros, isLoading, error, fetchForos } = useSocialStore();
+  const { foros, isLoading, error, fetchForos, fetchForo } = useSocialStore();
   const { user, isAdmin } = useCurrentUser();
   const [isEditingForo, setIsEditingForo] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+  const [isForoLoading, setIsForoLoading] = useState(true);
 
   const foro = foros.find((f) => String(f.id) === foroId);
   const isOwner = !foro || String(foro?.usuario?.id ?? "") === String(user?.id ?? "");
   const canEditForo = isAdmin || isOwner;
 
   useEffect(() => {
-    if (foros.length === 0) {
-      fetchForos();
-    }
-  }, [foros.length, fetchForos]);
+    let isMounted = true;
+
+    const loadForo = async () => {
+      if (!foroId) {
+        if (isMounted) setIsForoLoading(false);
+        return;
+      }
+
+      try {
+        await fetchForo(foroId);
+      } catch {
+        // Fallback: mantiene compatibilidad con el flujo previo si falla el detalle.
+        await fetchForos();
+      } finally {
+        if (isMounted) setIsForoLoading(false);
+      }
+    };
+
+    void loadForo();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [foroId, fetchForo, fetchForos]);
 
   const onUpdateForo = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -64,7 +85,7 @@ export default function ForoDetailPage() {
     }
   };
 
-  if (isLoading && !foro) {
+  if ((isLoading || isForoLoading) && !foro) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-50">
         <div className="flex flex-col items-center justify-center">
