@@ -2,10 +2,11 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## OpenAPI -> cliente TypeScript
 
-Este proyecto genera un cliente TS desde `generated/openapi.yaml`.
+Este proyecto genera un cliente TS con `@hey-api/openapi-ts` y lo deja en `api/`.
 
-- Salida generada: `generated/api-client/`
-- Reexport estable: `generated/api/index.ts`
+- Salida generada: `api/`
+- Punto de entrada estable: `api/index.ts`
+- Configuración del generador: `openapi-ts.config.ts`
 
 Comandos:
 
@@ -17,14 +18,13 @@ npm run api:generate:clean
 Ejemplo de uso:
 
 ```ts
-import { OpenAPI, UsuarioService } from "@/generated/api";
+import { UsersService } from "@/api";
+import { createApiClient } from "@/lib/api-client-server";
 
-OpenAPI.BASE = "http://localhost:8000";
-OpenAPI.TOKEN = "<jwt>";
+const client = createApiClient("<jwt>");
 
-const auth = await UsuarioService.login({
-  username: "demo",
-  password: "demo",
+const profile = await UsersService.usersMeRetrieve({
+  client,
 });
 ```
 

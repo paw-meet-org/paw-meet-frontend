@@ -1,39 +1,20 @@
+import { NextResponse } from 'next/server';
+import { SchemaService } from '@/api';
+import { createApiClient, mapApiError } from '@/lib/api-client-server';
+
+// GET /api/backend/health -> returns backend schema (health)
 export async function GET() {
-  const baseUrl = process.env.API_BASE_URL ?? "http://localhost:8003";
-  const url = `${baseUrl.replace(/\/$/, "")}/api/schema`;
-
   try {
-    const response = await fetch(url, { method: "GET" });
-    const raw = await response.text();
+    const client = createApiClient();
+    const result = await SchemaService.schemaRetrieve({ client });
 
-    let body: unknown = raw;
-    try {
-      body = raw ? (JSON.parse(raw) as unknown) : null;
-    } catch {
-      body = raw;
+    if (result.error) {
+      return NextResponse.json({ message: 'API error', details: result.error }, { status: result.response?.status ?? 502 });
     }
 
-    return Response.json(
-      {
-        backendUrl: baseUrl,
-        target: "/api/schema",
-        status: response.status,
-        ok: response.ok,
-        body,
-      },
-      { status: 200 }
-    );
+    return NextResponse.json(result.data, { status: 200 });
   } catch (error) {
-    return Response.json(
-      {
-        backendUrl: baseUrl,
-        target: "/api/schema",
-        ok: false,
-        message: "No se pudo conectar con el backend",
-        details: String(error),
-      },
-      { status: 502 }
-    );
+    return mapApiError(error);
   }
 }
 

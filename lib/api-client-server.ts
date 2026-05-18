@@ -1,29 +1,78 @@
-import { ApiError, OpenAPI } from "@/generated/api";
+import { createClient, createConfig, type Client } from "@/api/client";
+import { getAccessToken } from "@/lib/supabase/server";
+import { createClient as createSupabaseBrowserClient } from "@/lib/supabase/client";
 
-// Use backend URL from env in server routes; fallback to generated default.
-OpenAPI.BASE = process.env.API_BASE_URL ?? OpenAPI.BASE;
-export function configureOpenApiFromRequest(request: Request) {
-  const authHeader = request.headers.get("authorization");
-  const bearerToken = authHeader?.startsWith("Bearer ")
-    ? authHeader.slice("Bearer ".length)
-    : undefined;
+const DEFAULT_BACKEND_URL =
+  process.env.OPENAPI_URL ?? process.env.API_BASE_URL ?? "http://localhost:8003";
 
-  OpenAPI.TOKEN = bearerToken;
+export function getBackendBaseUrl() {
+  return DEFAULT_BACKEND_URL.replace(/\/$/, "");
 }
 
-export function mapApiError(error: unknown): Response {
-  if (error instanceof ApiError) {
-    return Response.json(
-      {
-        message: error.message,
-        status: error.status,
-        details: error.body ?? null,
+export function createApiClient(token?: string): Client {
+  return createClient(
+    createConfig({
+      baseUrl: getBackendBaseUrl(),
+      auth: token,
+    })
+  );
+}
+
+export async function createAuthedApiClient(): Promise<Client> {
+  const token = await getAccessToken();
+  return createApiClient(token ?? undefined);
+}
+
+/**
+ * Create a server-side API client that resolves auth by reading the
+ * Supabase session token for the current request. Use this from
+ * Route Handlers and Server Components.
+ */
+export function createServerApiClient(): Client {
+  return createClient(
+    createConfig({
+      baseUrl: getBackendBaseUrl(),
+      // auth may be a function; the SDK will call it and prefix appropriately
+      auth: async () => {
+        const token = await getAccessToken();
+        return token ?? undefined;
       },
-      { status: error.status || 500 }
-    );
-  }
-
-  console.error("Unexpected API route error", error);
-  return Response.json({ message: "Unexpected server error" }, { status: 500 });
+    })
+  );
 }
+
+/**
+ * Create a browser API client that reads the Supabase session from the
+ * browser Supabase client. Use this in Client Components / browser code.
+ */
+export function createBrowserApiClient(): Client {
+  const supabase = createSupabaseBrowserClient();
+  return createClient(
+    createConfig({
+      baseUrl: getBackendBaseUrl(),
+      auth: async () => {
+        const { data } = await supabase.auth.getSession();
+        return data.session?.access_token ?? undefined;
+      },
+    })
+  );
+}
+
+export function mapApiError(error: unknown, status = 500): Response {
+  const message =
+    typeof error === "string"
+      ? error
+      : error instanceof Error
+        ? error.message
+        : "Unexpected API route error";
+
+  return Response.json(
+    {
+      message,
+      details: error,
+    },
+    { status }
+  );
+}
+
 

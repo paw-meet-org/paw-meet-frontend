@@ -1,16 +1,16 @@
 
 import { create } from "zustand";
-import type { EncuentrosBase } from "@/generated/api-client/models/EncuentrosBase";
-import type { GlobalResponseSchema } from "@/generated/api-client/models/GlobalResponseSchema";
-import { EncuentrosService } from "@/generated/api-client/services/EncuentrosService";
+import type { MeetingDetail, MeetingDetailRequestWritable } from "@/api";
 
 type EncuentrosStore = {
-  encuentros: EncuentrosBase[];
+  encuentros: MeetingDetail[];
   lastUpdatedAt: number | null;
   isLoading: boolean;
   error: string | null;
-  fetchEncuentros: (force?: boolean) => Promise<EncuentrosBase[]>;
-  createEncuentro: (payload: EncuentrosBase) => Promise<GlobalResponseSchema>;
+  fetchEncuentros: (force?: boolean) => Promise<MeetingDetail[]>;
+  createEncuentro: (payload: MeetingDetailRequestWritable) => Promise<MeetingDetail>;
+  updateEncuentro: (id: number, payload: MeetingDetailRequestWritable) => Promise<MeetingDetail>;
+  deleteEncuentro: (id: number) => Promise<void>;
   clearError: () => void;
 };
 
@@ -34,7 +34,11 @@ export const useEncuentrosStore = create<EncuentrosStore>((set, get) => ({
 
     set({ isLoading: true, error: null });
     try {
-      const data = await EncuentrosService.obtenerEncuentros();
+      const response = await fetch("/api/encuentros");
+      if (!response.ok) {
+        throw new Error(`Failed to fetch encuentros: ${response.statusText}`);
+      }
+      const data = (await response.json()) as MeetingDetail[];
       set({
         encuentros: data,
         lastUpdatedAt: Date.now(),
@@ -50,10 +54,59 @@ export const useEncuentrosStore = create<EncuentrosStore>((set, get) => ({
   async createEncuentro(payload) {
     set({ isLoading: true, error: null });
     try {
-      const response = await EncuentrosService.registrarEncuentro(payload);
+      const response = await fetch("/api/encuentros", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!response.ok) {
+        let detail = response.statusText;
+        try {
+          const body = await response.json() as Record<string, unknown>;
+          detail = JSON.stringify(body.details ?? body.message ?? body);
+        } catch { /* ignore */ }
+        throw new Error(`Error al crear encuentro: ${detail}`);
+      }
+      const data = (await response.json()) as MeetingDetail;
       await get().fetchEncuentros(true);
       set({ isLoading: false, error: null });
-      return response;
+      return data;
+    } catch (error) {
+      set({ isLoading: false, error: String(error) });
+      throw error;
+    }
+  },
+  async updateEncuentro(id, payload) {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await fetch(`/api/encuentros/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!response.ok) {
+        throw new Error(`Failed to update encuentro: ${response.statusText}`);
+      }
+      const data = (await response.json()) as MeetingDetail;
+      await get().fetchEncuentros(true);
+      set({ isLoading: false, error: null });
+      return data;
+    } catch (error) {
+      set({ isLoading: false, error: String(error) });
+      throw error;
+    }
+  },
+  async deleteEncuentro(id) {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await fetch(`/api/encuentros/${id}`, {
+        method: "DELETE",
+      });
+      if (!response.ok) {
+        throw new Error(`Failed to delete encuentro: ${response.statusText}`);
+      }
+      await get().fetchEncuentros(true);
+      set({ isLoading: false, error: null });
     } catch (error) {
       set({ isLoading: false, error: String(error) });
       throw error;
