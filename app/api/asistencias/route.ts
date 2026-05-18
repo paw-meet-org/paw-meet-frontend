@@ -62,6 +62,15 @@ export async function POST(request: Request) {
       );
     }
 
+    // Algunos backends ya devuelven la asistencia completa en user_attendance.
+    const maybeUserAttendance = (result.data as Record<string, unknown> | undefined)?.user_attendance;
+    if (maybeUserAttendance && typeof maybeUserAttendance === 'object') {
+      const maybeAttendance = maybeUserAttendance as Record<string, unknown>;
+      if ('id' in maybeAttendance && 'meeting' in maybeAttendance && 'user' in maybeAttendance) {
+        return NextResponse.json(maybeAttendance, { status: 201 });
+      }
+    }
+
     const attendanceId = String(result.data?.user_attendance ?? '').trim();
     if (attendanceId) {
       const attendanceResult = await AttendancesService.attendancesRetrieve({
@@ -74,13 +83,9 @@ export async function POST(request: Request) {
       }
     }
 
-    return NextResponse.json(
-      {
-        message: 'Asistencia creada pero no se pudo resolver su detalle',
-        details: result.data,
-      },
-      { status: 502 }
-    );
+    // Si join fue exitoso pero no se puede resolver ID de asistencia, devolvemos 200
+    // para no romper el flujo de UI con un falso error.
+    return NextResponse.json(result.data, { status: 200 });
   } catch (error) {
     return mapApiError(error, 400);
   }

@@ -32,33 +32,33 @@ export const useMascotasStore = create<MascotasStore>((set, get) => ({
       throw error;
     }
   },
-  async createMascota(payload) {
-    set({ isLoading: true, error: null });
-    try {
-      const response = await fetch("/api/mascotas", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      if (!response.ok) {
-        let detail = response.statusText;
-        try {
-          const body = (await response.json()) as Record<string, unknown>;
-          detail = JSON.stringify(body.details ?? body.message ?? body);
-        } catch {
-          // ignore parse errors and keep status text
-        }
-        throw new Error(`Failed to create mascota: ${detail}`);
-      }
-      const data = (await response.json()) as Pet;
-      await get().fetchMascotas();
-      set({ isLoading: false, error: null });
-      return data;
-    } catch (error) {
-      set({ isLoading: false, error: String(error) });
-      throw error;
-    }
-  },
+   async createMascota(payload) {
+     set({ isLoading: true, error: null });
+     try {
+       const response = await fetch("/api/mascotas", {
+         method: "POST",
+         headers: { "Content-Type": "application/json" },
+         body: JSON.stringify(payload),
+       });
+       if (!response.ok) {
+         let detail = response.statusText;
+         try {
+           const body = (await response.json()) as Record<string, unknown>;
+           detail = JSON.stringify(body.details ?? body.message ?? body);
+         } catch {
+           // ignore parse errors and keep status text
+         }
+         throw new Error(`Failed to create mascota: ${detail}`);
+       }
+       const data = (await response.json()) as Pet;
+       await get().fetchMascotas();
+       set({ isLoading: false, error: null });
+       return data;
+     } catch (error) {
+       set({ isLoading: false, error: String(error) });
+       throw error;
+     }
+   },
   async updateMascota(id, payload) {
     set({ isLoading: true, error: null });
     try {

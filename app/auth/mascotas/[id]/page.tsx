@@ -54,28 +54,29 @@ export default function NuevaOEditarMascotaPage() {
     }
   }, [fetchTipos, tipos.length]);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setFormError(null);
-    clearError();
+   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+     e.preventDefault();
+     setFormError(null);
+     clearError();
 
-    const formData = new FormData(e.currentTarget);
-    const name = String(formData.get("name") ?? "").trim();
-    const rawPetType = String(formData.get("pet_type") ?? "").trim();
-    const bio = String(formData.get("bio") ?? "");
+     const formData = new FormData(e.currentTarget);
+     const name = String(formData.get("name") ?? "").trim();
+     const rawPetType = String(formData.get("pet_type") ?? "").trim();
+     const bio = String(formData.get("bio") ?? "");
 
-    const selectedType = tipos.find(
-      (tipo) =>
-        String(tipo.codigo ?? "").toLowerCase() === rawPetType.toLowerCase() ||
-        String(tipo.nombre ?? "").toLowerCase() === rawPetType.toLowerCase() ||
-        String(tipo.id ?? "") === rawPetType
-    );
-    const pet_type = String(selectedType?.id ?? rawPetType);
+     const selectedType = tipos.find(
+       (tipo) =>
+         String(tipo.codigo ?? "").toLowerCase() === rawPetType.toLowerCase() ||
+         String(tipo.nombre ?? "").toLowerCase() === rawPetType.toLowerCase() ||
+         String(tipo.id ?? "") === rawPetType
+     );
+     const pet_type = String(selectedType?.id ?? rawPetType);
 
-    if (!name || !pet_type) {
-      setFormError("El nombre y el tipo de mascota son requeridos");
-      return;
-    }
+
+     if (!name || !pet_type) {
+       setFormError("El nombre y el tipo de mascota son requeridos");
+       return;
+     }
 
     if (petTypeOptions.length === 0) {
       setFormError("No hay tipos de mascota disponibles en este momento.");

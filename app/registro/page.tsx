@@ -16,6 +16,7 @@ export default function RegistroPage() {
   const [formError, setFormError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -39,7 +40,12 @@ export default function RegistroPage() {
         throw signUpError;
       }
       
-      router.push("/perfil");
+      setSuccessMessage("Se ha mandado un email de verificación, revisa tu email");
+      
+      // Redirigir a login después de 3 segundos
+      setTimeout(() => {
+        router.push("/login");
+      }, 3000);
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     } finally {
@@ -114,20 +120,27 @@ export default function RegistroPage() {
             />
           </div>
 
-          {(formError || error) && (
-            <div className="flex items-center gap-3 rounded-xl bg-red-50 p-4 text-red-800 border border-red-100">
-              <span>⚠️</span>
-              <p className="text-sm font-medium">{formError || error}</p>
-            </div>
-          )}
+           {(formError || error) && (
+             <div className="flex items-center gap-3 rounded-xl bg-red-50 p-4 text-red-800 border border-red-100">
+               <span>⚠️</span>
+               <p className="text-sm font-medium">{formError || error}</p>
+             </div>
+           )}
 
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="mt-6 w-full rounded-full bg-orange-500 px-4 py-4 text-lg font-bold text-white shadow-lg shadow-orange-500/30 transition-transform hover:-translate-y-1 hover:bg-orange-600 disabled:opacity-60 disabled:hover:translate-y-0"
-          >
-            {isLoading ? "Creando cuenta..." : "Comenzar ahora"}
-          </button>
+           {successMessage && (
+             <div className="flex items-center gap-3 rounded-xl bg-green-50 p-4 text-green-800 border border-green-100">
+               <span>✅</span>
+               <p className="text-sm font-medium">{successMessage}</p>
+             </div>
+           )}
+
+           <button
+             type="submit"
+             disabled={isLoading || !!successMessage}
+             className="mt-6 w-full rounded-full bg-orange-500 px-4 py-4 text-lg font-bold text-white shadow-lg shadow-orange-500/30 transition-transform hover:-translate-y-1 hover:bg-orange-600 disabled:opacity-60 disabled:hover:translate-y-0"
+           >
+             {isLoading ? "Creando cuenta..." : successMessage ? "Redirigiendo..." : "Comenzar ahora"}
+           </button>
         </form>
 
         <p className="mt-8 text-center text-slate-500 font-medium">

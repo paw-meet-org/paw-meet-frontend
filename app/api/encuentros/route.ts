@@ -12,7 +12,31 @@ export async function GET() {
       return NextResponse.json({ message: 'API error', details: result.error }, { status: result.response?.status ?? 502 });
     }
 
-    return NextResponse.json(result.data, { status: 200 });
+    // Enriquecer cada encuentro con sus detalles completos (incluye asistentes)
+    const meetings = result.data ?? [];
+    if (!Array.isArray(meetings)) {
+      return NextResponse.json(meetings, { status: 200 });
+    }
+
+    const enrichedMeetings = await Promise.all(
+      meetings.map(async (meeting) => {
+        try {
+          const detailResult = await MeetingsService.meetingsRetrieve({
+            client,
+            path: { id: meeting.id },
+          });
+          
+          if (!detailResult.error && detailResult.data) {
+            return detailResult.data;
+          }
+        } catch {
+          // Si falla obtener detalles, retornar el basic meeting
+        }
+        return meeting;
+      })
+    );
+
+    return NextResponse.json(enrichedMeetings, { status: 200 });
   } catch (error) {
     return mapApiError(error);
   }

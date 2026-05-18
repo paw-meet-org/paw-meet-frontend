@@ -24,17 +24,40 @@ export default function EncuentroDetailPage() {
 
   const encuentro = encuentros.find((e) => String(e.id) === encuentroId);
   const isCreator =
-    !encuentro ||
-    (String(encuentro?.creator ?? "") === String(user?.id ?? "") ||
-      String(encuentro?.creator_email ?? "") === String(user?.email ?? "") ||
-      String(encuentro?.is_creator ?? "").toLowerCase() === "true");
+    Boolean(encuentro?.creator) &&
+    Boolean(user?.id) &&
+    String(encuentro?.creator) === String(user?.id);
   const canEditEncuentro = isAdmin || isCreator;
 
   // Comprobar si el usuario ya está apuntado
-  const myAsistencia = asistencias.find(
-    (a) => String(a.meeting) === encuentroId &&
-      (String(a.user) === String(user?.id ?? "") || String(a.user_email) === String(user?.email ?? ""))
+  const myAsistencia = isCreator
+    ? undefined
+    : asistencias.find(
+      (a) => String(a.meeting) === encuentroId &&
+        (String(a.user) === String(user?.id ?? "") || String(a.user_email) === String(user?.email ?? ""))
+    );
+
+  // Construir lista de asistentes incluyendo al creador como primer asistente
+  const attendeesList = encuentro?.attendees ? [...encuentro.attendees] : [];
+  const creatorAlreadyInList = attendeesList.some(
+    (a) => String(a.user) === String(encuentro?.creator)
   );
+
+  if (isCreator && !creatorAlreadyInList && encuentro) {
+    // Crear un pseudo-asistente para el creador
+    const creatorAttendee = {
+      id: -1, // ID especial para el creador
+      meeting: encuentro.id,
+      user: encuentro.creator,
+      user_email: encuentro.creator_email,
+      user_name: encuentro.creator_name,
+      pets_details: encuentro.pets_details || [],
+      status: 'confirmed' as const,
+      created_at: encuentro.created_at,
+      updated_at: encuentro.updated_at,
+    };
+    attendeesList.unshift(creatorAttendee);
+  }
 
   useEffect(() => {
     if (encuentros.length === 0) fetchEncuentros();
@@ -92,12 +115,18 @@ export default function EncuentroDetailPage() {
   };
 
   const onJoin = async () => {
+    if (isCreator) {
+      setFormError("Este es tu encuentro");
+      return;
+    }
     setFormError(null);
     try {
       const asistencia = await createAsistencia({ meetingId: Number(encuentroId), status: "confirmed", notes: "" });
       setJoinSuccess(true);
       await fetchEncuentros(true);
-      router.push(`/auth/asistencias/${asistencia.id}`);
+      if (asistencia?.id != null) {
+        router.push(`/auth/asistencias/${asistencia.id}`);
+      }
     } catch (err) {
       setFormError(String(err));
     }
@@ -202,7 +231,11 @@ export default function EncuentroDetailPage() {
                   <p className="text-sm font-medium">¡Te has apuntado al encuentro!</p>
                 </div>
               )}
-              {myAsistencia ? (
+              {isCreator ? (
+                <div className="w-full rounded-full border-2 border-slate-200 bg-slate-100 px-6 py-3 text-center font-bold text-slate-600">
+                  Este es tu encuentro
+                </div>
+              ) : myAsistencia ? (
                 <button
                   onClick={onLeave}
                   disabled={isLoadingAsistencias}
@@ -328,13 +361,13 @@ export default function EncuentroDetailPage() {
           <div className="mb-6 flex items-center justify-between">
             <div>
               <h2 className="text-3xl font-bold text-slate-900">
-                Asistencias ({encuentro.attendees?.length ?? 0})
+                Asistencias ({attendeesList.length})
               </h2>
               <p className="mt-2 text-slate-500">Personas confirmadas para este encuentro</p>
             </div>
           </div>
 
-          {!encuentro.attendees || encuentro.attendees.length === 0 ? (
+          {attendeesList.length === 0 ? (
             <div className="flex flex-col items-center justify-center rounded-3xl border border-slate-200 bg-white p-16 text-center shadow-sm">
               <div className="mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-slate-50 text-5xl">
                 👥
@@ -346,9 +379,14 @@ export default function EncuentroDetailPage() {
             </div>
           ) : (
             <div className="grid gap-6">
-              {encuentro.attendees.map((asistencia) => (
+              {attendeesList.map((asistencia) => (
                 <div key={asistencia.id} className="group relative overflow-hidden rounded-3xl bg-white p-6 shadow-sm border border-slate-100 transition-all hover:-translate-y-1 hover:shadow-xl">
                   <div className="absolute -left-10 -top-10 h-32 w-32 rounded-full bg-blue-500/5 blur-2xl transition-transform group-hover:scale-150"></div>
+                  {asistencia.id === -1 && (
+                    <div className="absolute top-4 right-4 inline-flex items-center gap-1 rounded-full bg-orange-100 px-3 py-1 text-xs font-bold text-orange-700">
+                      👑 Creador
+                    </div>
+                  )}
                   <AsistenciaSection asistencia={asistencia} />
                 </div>
               ))}

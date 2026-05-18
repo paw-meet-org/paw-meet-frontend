@@ -61,7 +61,7 @@ export async function DELETE(
       return NextResponse.json({ message: 'API error', details: result.error }, { status: result.response?.status ?? 502 });
     }
 
-    return NextResponse.json({ message: 'Tipo de mascota eliminado' }, { status: 204 });
+    return NextResponse.json({ message: 'Tipo de mascota eliminado' }, { status: 200 });
   } catch (error) {
     return mapApiError(error);
   }
