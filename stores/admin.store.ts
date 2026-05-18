@@ -1,40 +1,36 @@
-import type { CiudadBase } from "@/generated/api-client/models/CiudadBase";
-import type { GlobalResponseSchema } from "@/generated/api-client/models/GlobalResponseSchema";
-import type { SponsorBase } from "@/generated/api-client/models/SponsorBase";
-import type { Usuario } from "@/generated/api-client/models/Usuario";
-import type { UsuarioBase } from "@/generated/api-client/models/UsuarioBase";
+import type { City, CityRequest, UserProfile } from "@/api";
 import { create } from "zustand";
-import { AdministradorService } from "@/generated/api-client/services/AdministradorService";
 
 type AdminStore = {
-  usuarios: Usuario[];
-  sponsors: SponsorBase[];
-  ciudades: CiudadBase[];
+  usuarios: UserProfile[];
+  ciudades: City[];
   isLoading: boolean;
   error: string | null;
-  fetchUsuarios: () => Promise<Usuario[]>;
-  createUsuario: (payload: UsuarioBase) => Promise<GlobalResponseSchema>;
-  updateUsuario: (id: string, payload: UsuarioBase) => Promise<GlobalResponseSchema>;
+  fetchUsuarios: () => Promise<UserProfile[]>;
+  createUsuario: (payload: unknown) => Promise<UserProfile>;
+  updateUsuario: (id: string, payload: unknown) => Promise<UserProfile>;
   deleteUsuario: (id: string) => Promise<void>;
-  fetchSponsors: () => Promise<SponsorBase[]>;
-  createSponsor: (payload: SponsorBase) => Promise<GlobalResponseSchema>;
-  updateSponsor: (id: string, payload: SponsorBase) => Promise<GlobalResponseSchema>;
-  deleteSponsor: (id: string) => Promise<void>;
-  fetchCiudades: () => Promise<CiudadBase[]>;
-  createCiudad: (payload: CiudadBase) => Promise<GlobalResponseSchema>;
+  fetchCiudades: () => Promise<City[]>;
+  createCiudad: (payload: CityRequest) => Promise<City>;
+  updateCiudad: (id: string, payload: CityRequest) => Promise<City>;
+  deleteCiudad: (id: string) => Promise<void>;
   clearError: () => void;
 };
 
 export const useAdminStore = create<AdminStore>((set, get) => ({
   usuarios: [],
-  sponsors: [],
   ciudades: [],
   isLoading: false,
   error: null,
   async fetchUsuarios() {
     set({ isLoading: true, error: null });
     try {
-      const data = await AdministradorService.obtenerUsuarios();
+      const response = await fetch("/api/admin");
+      if (!response.ok) {
+        throw new Error(`Failed to fetch usuarios: ${response.statusText}`);
+      }
+      const raw = await response.json();
+      const data = Array.isArray(raw) ? (raw as UserProfile[]) : ((raw?.results ?? []) as UserProfile[]);
       set({ usuarios: data, isLoading: false, error: null });
       return data;
     } catch (error) {
@@ -45,10 +41,18 @@ export const useAdminStore = create<AdminStore>((set, get) => ({
   async createUsuario(payload) {
     set({ isLoading: true, error: null });
     try {
-      const response = await AdministradorService.registrarUsuario(payload);
+      const response = await fetch("/api/admin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!response.ok) {
+        throw new Error(`Failed to create usuario: ${response.statusText}`);
+      }
+      const data = (await response.json()) as UserProfile;
       await get().fetchUsuarios();
       set({ isLoading: false, error: null });
-      return response;
+      return data;
     } catch (error) {
       set({ isLoading: false, error: String(error) });
       throw error;
@@ -57,10 +61,18 @@ export const useAdminStore = create<AdminStore>((set, get) => ({
   async updateUsuario(id, payload) {
     set({ isLoading: true, error: null });
     try {
-      const response = await AdministradorService.actualizarUsuario(id, payload);
+      const response = await fetch(`/api/admin/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!response.ok) {
+        throw new Error(`Failed to update usuario: ${response.statusText}`);
+      }
+      const data = (await response.json()) as UserProfile;
       await get().fetchUsuarios();
       set({ isLoading: false, error: null });
-      return response;
+      return data;
     } catch (error) {
       set({ isLoading: false, error: String(error) });
       throw error;
@@ -69,54 +81,13 @@ export const useAdminStore = create<AdminStore>((set, get) => ({
   async deleteUsuario(id) {
     set({ isLoading: true, error: null });
     try {
-      await AdministradorService.deleteUsuario(id);
+      const response = await fetch(`/api/admin/${id}`, {
+        method: "DELETE",
+      });
+      if (!response.ok) {
+        throw new Error(`Failed to delete usuario: ${response.statusText}`);
+      }
       await get().fetchUsuarios();
-      set({ isLoading: false, error: null });
-    } catch (error) {
-      set({ isLoading: false, error: String(error) });
-      throw error;
-    }
-  },
-  async fetchSponsors() {
-    set({ isLoading: true, error: null });
-    try {
-      const data = await AdministradorService.obtenerSponsors();
-      set({ sponsors: data, isLoading: false, error: null });
-      return data;
-    } catch (error) {
-      set({ isLoading: false, error: String(error) });
-      throw error;
-    }
-  },
-  async createSponsor(payload) {
-    set({ isLoading: true, error: null });
-    try {
-      const response = await AdministradorService.registrarSponsor(payload);
-      await get().fetchSponsors();
-      set({ isLoading: false, error: null });
-      return response;
-    } catch (error) {
-      set({ isLoading: false, error: String(error) });
-      throw error;
-    }
-  },
-  async updateSponsor(id, payload) {
-    set({ isLoading: true, error: null });
-    try {
-      const response = await AdministradorService.actualizarSponsor(id, payload);
-      await get().fetchSponsors();
-      set({ isLoading: false, error: null });
-      return response;
-    } catch (error) {
-      set({ isLoading: false, error: String(error) });
-      throw error;
-    }
-  },
-  async deleteSponsor(id) {
-    set({ isLoading: true, error: null });
-    try {
-      await AdministradorService.deleteSponsor(id);
-      await get().fetchSponsors();
       set({ isLoading: false, error: null });
     } catch (error) {
       set({ isLoading: false, error: String(error) });
@@ -126,7 +97,11 @@ export const useAdminStore = create<AdminStore>((set, get) => ({
   async fetchCiudades() {
     set({ isLoading: true, error: null });
     try {
-      const data = await AdministradorService.obtenerCiudades();
+      const response = await fetch("/api/ciudades");
+      if (!response.ok) {
+        throw new Error(`Failed to fetch ciudades: ${response.statusText}`);
+      }
+      const data = (await response.json()) as City[];
       set({ ciudades: data, isLoading: false, error: null });
       return data;
     } catch (error) {
@@ -137,10 +112,54 @@ export const useAdminStore = create<AdminStore>((set, get) => ({
   async createCiudad(payload) {
     set({ isLoading: true, error: null });
     try {
-      const response = await AdministradorService.registrarCiudad(payload);
+      const response = await fetch("/api/ciudades", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!response.ok) {
+        throw new Error(`Failed to create ciudad: ${response.statusText}`);
+      }
+      const data = (await response.json()) as City;
       await get().fetchCiudades();
       set({ isLoading: false, error: null });
-      return response;
+      return data;
+    } catch (error) {
+      set({ isLoading: false, error: String(error) });
+      throw error;
+    }
+  },
+  async updateCiudad(id, payload) {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await fetch(`/api/ciudades/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!response.ok) {
+        throw new Error(`Failed to update ciudad: ${response.statusText}`);
+      }
+      const data = (await response.json()) as City;
+      await get().fetchCiudades();
+      set({ isLoading: false, error: null });
+      return data;
+    } catch (error) {
+      set({ isLoading: false, error: String(error) });
+      throw error;
+    }
+  },
+  async deleteCiudad(id) {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await fetch(`/api/ciudades/${id}`, {
+        method: "DELETE",
+      });
+      if (!response.ok) {
+        throw new Error(`Failed to delete ciudad: ${response.statusText}`);
+      }
+      await get().fetchCiudades();
+      set({ isLoading: false, error: null });
     } catch (error) {
       set({ isLoading: false, error: String(error) });
       throw error;

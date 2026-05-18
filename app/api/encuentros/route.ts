@@ -1,24 +1,36 @@
-import { EncuentrosService, type EncuentrosBase } from "@/generated/api";
-import { configureOpenApiFromRequest, mapApiError } from "@/lib/api-client-server";
+import { NextResponse } from 'next/server';
+import { MeetingsService } from '@/api';
+import { createAuthedApiClient, mapApiError } from '@/lib/api-client-server';
 
-export async function GET(request: Request) {
+// GET /api/encuentros -> lista encuentros
+export async function GET() {
   try {
-    configureOpenApiFromRequest(request);
-    const data = await EncuentrosService.obtenerEncuentros();
-    return Response.json(data, { status: 200 });
+    const client = await createAuthedApiClient();
+    const result = await MeetingsService.meetingsList({ client });
+
+    if (result.error) {
+      return NextResponse.json({ message: 'API error', details: result.error }, { status: result.response?.status ?? 502 });
+    }
+
+    return NextResponse.json(result.data, { status: 200 });
   } catch (error) {
     return mapApiError(error);
   }
 }
 
+// POST /api/encuentros -> crear encuentro
 export async function POST(request: Request) {
   try {
-    configureOpenApiFromRequest(request);
-    const payload = (await request.json()) as EncuentrosBase;
-    const data = await EncuentrosService.registrarEncuentro(payload);
-    return Response.json(data, { status: 201 });
+    const payload = await request.json();
+    const client = await createAuthedApiClient();
+    const result = await MeetingsService.meetingsCreate({ client, body: payload });
+
+    if (result.error) {
+      return NextResponse.json({ message: 'API error', details: result.error }, { status: result.response?.status ?? 502 });
+    }
+
+    return NextResponse.json(result.data, { status: 201 });
   } catch (error) {
-    return mapApiError(error);
+    return mapApiError(error, 400);
   }
 }
-

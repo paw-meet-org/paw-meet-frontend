@@ -7,11 +7,15 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "api:generate": "openapi --input ./generated/openapi.yaml --output ./generated/api-client --client fetch --useUnionTypes",
-    "api:generate:clean": "rm -rf ./generated/api-client && npm run api:generate",
-    "api:check": "test -f ./generated/api-client/index.ts"
+    "smoke:api": "node scripts/smoke-api.mjs",
+    "api:generate": "npx @hey-api/openapi-ts",
+    "api:generate:clean": "rm -rf ./api && npm run api:generate",
+    "api:check": "test -f ./api/index.ts",
+    "openapi": "npx @hey-api/openapi-ts"
   },
   "dependencies": {
+    "@supabase/ssr": "^0.10.3",
+    "@supabase/supabase-js": "^2.57.0",
     "next": "16.2.3",
     "postcss": "^8.5.10",
     "react": "19.2.4",
@@ -19,13 +23,13 @@
     "zustand": "^5.0.12"
   },
   "devDependencies": {
+    "@hey-api/openapi-ts": "0.97.1",
     "@tailwindcss/postcss": "^4.2.2",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.2.3",
-    "openapi-typescript-codegen": "^0.29.0",
     "tailwindcss": "^4.2.2",
     "typescript": "^5"
   }

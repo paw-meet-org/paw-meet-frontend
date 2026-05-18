@@ -1,30 +1,37 @@
-import { proxyBackendJson } from "@/lib/backend-proxy";
+import { NextResponse } from 'next/server';
+import { UsersService } from '@/api';
+import { createAuthedApiClient, mapApiError } from '@/lib/api-client-server';
 
-export async function GET(request: Request) {
+// GET /api/user -> returns current user's profile
+export async function GET() {
   try {
-    return await proxyBackendJson(request, "/api/users/me/", "GET");
+    const client = await createAuthedApiClient();
+    const result = await UsersService.usersMeRetrieve({ client });
+
+    if (result.error) {
+      return NextResponse.json({ message: 'API error', details: result.error }, { status: result.response?.status ?? 502 });
+    }
+
+    return NextResponse.json(result.data, { status: 200 });
   } catch (error) {
-    return Response.json(
-      {
-        message: "No se pudo cargar el perfil",
-        details: String(error),
-      },
-      { status: 502 }
-    );
+    return mapApiError(error);
   }
 }
 
+// PATCH /api/user -> partial update of current user's profile
 export async function PATCH(request: Request) {
   try {
-    return await proxyBackendJson(request, "/api/users/me/", "PATCH", true);
+    const payload = await request.json();
+    const client = await createAuthedApiClient();
+    const result = await UsersService.usersMePartialUpdate({ client, body: payload });
+
+    if (result.error) {
+      return NextResponse.json({ message: 'API error', details: result.error }, { status: result.response?.status ?? 502 });
+    }
+
+    return NextResponse.json(result.data ?? null, { status: result.response?.status ?? 200 });
   } catch (error) {
-    return Response.json(
-      {
-        message: "No se pudo actualizar el perfil",
-        details: String(error),
-      },
-      { status: 502 }
-    );
+    return mapApiError(error);
   }
 }
 

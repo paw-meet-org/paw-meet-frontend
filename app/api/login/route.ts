@@ -1,13 +1,8 @@
-import { UsuarioService, type Login as LoginType } from "@/generated/api-client";
-import { configureOpenApiFromRequest, mapApiError } from "@/lib/api-client-server";
+import { NextResponse } from 'next/server';
 
-export async function POST(request: Request) {
-  try {
-    configureOpenApiFromRequest(request);
-    const body = (await request.json()) as LoginType;
-    const data = await UsuarioService.login(body);
-    return Response.json(data, { status: 200 });
-  } catch (error) {
-    return mapApiError(error);
-  }
+// Proxy endpoints removed: prefer using the Supabase client directly from the browser.
+export async function POST() {
+  return NextResponse.json({ message: 'This proxy endpoint was removed. Use Supabase client directly in the frontend.' }, { status: 410 });
 }
+
+

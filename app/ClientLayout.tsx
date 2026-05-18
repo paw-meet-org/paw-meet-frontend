@@ -1,57 +1,104 @@
 "use client";
 
 import Link from "next/link";
-import { useAuthStore } from "@/stores/auth.store";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { createClient } from "@/lib/supabase/client";
+import { useUserRole } from "@/lib/use-user-role";
 
-const navItems = [
+const navItems: Array<{ href: string; label: string; isPrivate: boolean; adminOnly?: boolean; hideWhenAuth?: boolean }> = [
   { href: "/", label: "Inicio", isPrivate: false },
-  { href: "/registro", label: "Registro", isPrivate: false, hideWhenAuth: true },
-  { href: "/login", label: "Login", isPrivate: false, hideWhenAuth: true },
   { href: "/perfil", label: "Perfil", isPrivate: true },
-  { href: "/smoke", label: "Smoke", isPrivate: false },
+  { href: "/auth/mascotas", label: "Mascotas", isPrivate: true },
+  { href: "/auth/encuentros", label: "Encuentros", isPrivate: true },
+  { href: "/auth/foros", label: "Foros", isPrivate: true },
+  // Admin only
+  { href: "/auth/ciudades", label: "Ciudades", isPrivate: true, adminOnly: true },
+  { href: "/auth/categorias", label: "Categorías", isPrivate: true, adminOnly: true },
+  { href: "/auth/tipos-mascotas", label: "Tipos Mascotas", isPrivate: true, adminOnly: true },
 ];
 
 export function Navigation() {
-  const { isAuthenticated, hasHydrated, logout } = useAuthStore();
-  const [mounted, setMounted] = useState(false);
+  const supabase = createClient();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const { isAdmin } = useUserRole();
 
   useEffect(() => {
-    setMounted(true);
-  }, []);
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setIsAuthenticated(!!session);
+    });
 
-  const visibleNavItems = navItems.filter((item) => {
-    // Si no estamos en cliente hidratado, mostramos por defecto las rutas públicas no exclusivas
-    if (!mounted || !hasHydrated) return !item.isPrivate && !item.hideWhenAuth;
-    if (item.isPrivate && !isAuthenticated) return false;
-    if (item.hideWhenAuth && isAuthenticated) return false;
-    return true;
-  });
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsAuthenticated(!!session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, [supabase.auth]);
+
+  const visibleNavItems = useMemo(() => {
+    return navItems.filter((item) => {
+      if (item.isPrivate && !isAuthenticated) return false;
+      if (item.adminOnly && !isAdmin) return false;
+      return !item.hideWhenAuth || !isAuthenticated;
+    });
+  }, [isAdmin, isAuthenticated]);
+
+  const logout = async () => {
+    await supabase.auth.signOut();
+    window.location.href = "/";
+  };
 
   return (
-    <nav className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-3">
-      <Link href="/" className="text-xl font-bold text-slate-800 flex items-center gap-2">
-        <span className="text-2xl">🐾</span> Paw Meet
-      </Link>
-      <div className="flex flex-wrap items-center gap-2">
-        {visibleNavItems.map((item) => (
-          <Link
-            key={item.href}
-            href={item.href}
-            className="rounded-lg border border-transparent px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-100 hover:text-slate-900"
-          >
-            {item.label}
-          </Link>
-        ))}
-        {mounted && hasHydrated && isAuthenticated && (
+    <header className="sticky top-0 z-50 w-full border-b border-slate-200 bg-white/80 backdrop-blur-md transition-all">
+      <nav className="mx-auto flex w-full max-w-7xl items-center justify-between px-6 py-4">
+        <Link href="/" className="flex items-center gap-3 transition-transform hover:scale-105">
+          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-orange-400 to-orange-600 text-xl shadow-lg shadow-orange-500/30">
+            🐾
+          </span>
+          <span className="text-xl font-extrabold tracking-tight text-slate-800">
+            Paw Meet
+          </span>
+        </Link>
+
+        <div className="hidden lg:flex items-center gap-1">
+          {visibleNavItems.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className="rounded-full px-4 py-2 text-sm font-semibold text-slate-600 transition-all hover:bg-orange-50 hover:text-orange-600"
+            >
+              {item.label}
+            </Link>
+          ))}
+        </div>
+
+        <div className="flex items-center gap-3">
+          {isAuthenticated ? (
             <button
-              onClick={() => logout()}
-              className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm font-medium text-red-600 transition hover:bg-red-100 hover:text-red-700"
+              onClick={logout}
+              className="rounded-full border-2 border-slate-200 bg-white px-5 py-2 text-sm font-bold text-slate-700 shadow-sm transition-all hover:border-red-200 hover:bg-red-50 hover:text-red-600"
             >
               Cerrar sesión
             </button>
-        )}
-      </div>
-    </nav>
+          ) : (
+            <div className="flex items-center gap-2">
+              <Link
+                href="/login"
+                className="rounded-full px-5 py-2 text-sm font-bold text-slate-600 transition-colors hover:bg-slate-100"
+              >
+                Entrar
+              </Link>
+              <Link
+                href="/registro"
+                className="rounded-full bg-slate-900 px-5 py-2 text-sm font-bold text-white shadow-md transition-transform hover:scale-105 hover:bg-slate-800"
+              >
+                Registro
+              </Link>
+            </div>
+          )}
+        </div>
+      </nav>
+    </header>
   );
 }
